@@ -54,6 +54,8 @@ export default function ContactSales() {
     message: "",
   });
 
+  const [submitted, setSubmitted] = useState(false);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -71,9 +73,23 @@ export default function ContactSales() {
     }));
   };
 
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim() !== "" &&
+      formData.lastName.trim() !== "" &&
+      formData.workEmail.trim() !== "" &&
+      formData.phoneNumber.trim() !== "" &&
+      formData.companyName.trim() !== "" &&
+      formData.attendeeCount !== ""
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    if (isFormValid()) {
+      setSubmitted(true);
+      console.log("Form submitted:", formData);
+    }
   };
 
   return (
@@ -119,137 +135,154 @@ export default function ContactSales() {
 
             {/* Right Column - Form Section */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold text-valasys-gray-900 mb-1">
-                  Talk with our sales team
-                </h3>
-                <p className="text-sm text-valasys-gray-600">
-                  Let's schedule a chat.
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                      First name
-                    </label>
-                    <Input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      placeholder="Enter your first name"
-                      className="h-10"
-                    />
+              {submitted ? (
+                <div className="flex flex-col items-center justify-center min-h-full py-12 text-center">
+                  <CheckCircle2 className="w-16 h-16 text-valasys-blue mb-6" />
+                  <h3 className="text-2xl font-bold text-valasys-gray-900 mb-3">
+                    Thank you!
+                  </h3>
+                  <p className="text-lg text-valasys-gray-600">
+                    Thanks for your request to learn more! We'll be in touch
+                    soon.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-valasys-gray-900 mb-1">
+                      Talk with our sales team
+                    </h3>
+                    <p className="text-sm text-valasys-gray-600">
+                      Let's schedule a chat.
+                    </p>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                      Last name
-                    </label>
-                    <Input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      placeholder="Enter your last name"
-                      className="h-10"
-                    />
-                  </div>
-                </div>
 
-                {/* Email and Phone */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                      Work email
-                    </label>
-                    <Input
-                      type="email"
-                      name="workEmail"
-                      value={formData.workEmail}
-                      onChange={handleChange}
-                      placeholder="name@company.com"
-                      className="h-10"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                      Phone number
-                    </label>
-                    <Input
-                      type="tel"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      placeholder="+1 (555) 000-0123"
-                      className="h-10"
-                    />
-                  </div>
-                </div>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Name Fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                          First name <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="text"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          placeholder="Enter your first name"
+                          className="h-10"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                          Last name <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          placeholder="Enter your last name"
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
 
-                {/* Company Name */}
-                <div>
-                  <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                    Company name
-                  </label>
-                  <Input
-                    type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    placeholder="Company name"
-                    className="h-10"
-                  />
-                </div>
+                    {/* Email and Phone */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                          Work email <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="email"
+                          name="workEmail"
+                          value={formData.workEmail}
+                          onChange={handleChange}
+                          placeholder="name@company.com"
+                          className="h-10"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                          Phone number <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="tel"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleChange}
+                          placeholder="+1 (555) 000-0123"
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
 
-                {/* Attendee Count */}
-                <div>
-                  <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                    How many people will attend our chat?
-                  </label>
-                  <Select
-                    value={formData.attendeeCount}
-                    onValueChange={handleSelectChange}
-                  >
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Please provide the required info" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 person</SelectItem>
-                      <SelectItem value="2-3">2-3 people</SelectItem>
-                      <SelectItem value="4-5">4-5 people</SelectItem>
-                      <SelectItem value="6+">6+ people</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Company Name */}
+                    <div>
+                      <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                        Company name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        placeholder="Company name"
+                        className="h-10"
+                      />
+                    </div>
 
-                {/* Message */}
-                <div>
-                  <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
-                    How can our team help you?
-                  </label>
-                  <Textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Type message here..."
-                    className="resize-none"
-                    rows={4}
-                  />
-                </div>
+                    {/* Attendee Count */}
+                    <div>
+                      <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                        How many people will attend our chat?{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <Select
+                        value={formData.attendeeCount}
+                        onValueChange={handleSelectChange}
+                      >
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder="Please provide the required info" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 person</SelectItem>
+                          <SelectItem value="2-3">2-3 people</SelectItem>
+                          <SelectItem value="4-5">4-5 people</SelectItem>
+                          <SelectItem value="6+">6+ people</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Button */}
-                <div className="flex justify-center pt-6">
-                  <Button
-                    type="submit"
-                    className="px-12 h-11 bg-gradient-to-r from-valasys-orange to-valasys-orange-light hover:from-valasys-orange/90 hover:to-valasys-orange-light/90 text-white font-semibold"
-                  >
-                    Let's talk
-                  </Button>
-                </div>
-              </form>
+                    {/* Message */}
+                    <div>
+                      <label className="block text-xs font-semibold text-valasys-gray-700 mb-2">
+                        How can our team help you?
+                      </label>
+                      <Textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Type message here..."
+                        className="resize-none"
+                        rows={4}
+                      />
+                    </div>
+
+                    {/* Button */}
+                    <div className="flex justify-center pt-6">
+                      <Button
+                        type="submit"
+                        disabled={!isFormValid()}
+                        className="px-12 h-11 bg-gradient-to-r from-valasys-orange to-valasys-orange-light hover:from-valasys-orange/90 hover:to-valasys-orange-light/90 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Let's talk
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>

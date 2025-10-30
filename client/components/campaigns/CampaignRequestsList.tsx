@@ -43,8 +43,7 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { cn, Link } from "@/lib/utils";
 
 // Types
 type CampaignStatus =

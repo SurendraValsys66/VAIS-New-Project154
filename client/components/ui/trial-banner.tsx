@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Clock, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/utils";
 
 export type TrialState = {
   daysUsed: number;

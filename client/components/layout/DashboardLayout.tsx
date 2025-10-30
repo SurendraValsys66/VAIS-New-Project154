@@ -1,7 +1,8 @@
 import React, { ReactNode, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Link } from "@/lib/utils";
 import {
   User,
   Menu,
@@ -33,6 +34,7 @@ import {
   Plug,
   ChevronDown,
   Lock,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +64,7 @@ import OnboardingSkipBadge from "@/components/layout/OnboardingSkipBadge";
 import { useTour } from "@/contexts/TourContext";
 import PlatformTour from "@/components/tour/PlatformTour";
 import MasteryBottomBar from "@/components/layout/MasteryBottomBar";
+import MasteryProgressBadge from "@/components/layout/MasteryProgressBadge";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -82,6 +85,14 @@ const coreNavigationItems = [
     href: "/find-prospect",
     icon: Search,
     tourId: "prospect-nav",
+    submenu: [
+      {
+        name: "Favorites Prospects",
+        href: "/favorites-prospects",
+        icon: Heart,
+        tourId: "favorites-nav",
+      },
+    ],
   },
   {
     name: "Build My Campaign",
@@ -156,6 +167,63 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Contact Sales dialog
   const [showContactSalesDialog, setShowContactSalesDialog] = useState(false);
+
+  // Favorites and submenu state
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+
+  const [hasFavorites, setHasFavorites] = useState(false);
+  const [masteryMinimized, setMasteryMinimized] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem("valasys-mastery-minimized") === "1";
+    } catch (error) {
+      return false;
+    }
+  });
+  const [masteryPercent, setMasteryPercent] = useState(0);
+
+  useEffect(() => {
+    const checkFavorites = () => {
+      try {
+        const raw = localStorage.getItem("prospect:favorites");
+        const favorites = raw ? (JSON.parse(raw) as string[]) : [];
+        setHasFavorites(favorites.length > 0);
+      } catch {
+        setHasFavorites(false);
+      }
+    };
+
+    checkFavorites();
+    const handleStorageChange = () => checkFavorites();
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      "app:favorites-updated",
+      handleStorageChange as EventListener,
+    );
+
+    const handleMasteryMinimized = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setMasteryPercent(detail?.percent || 0);
+      setMasteryMinimized(true);
+    };
+
+    window.addEventListener(
+      "app:mastery-minimized",
+      handleMasteryMinimized as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "app:favorites-updated",
+        handleStorageChange as EventListener,
+      );
+      window.removeEventListener(
+        "app:mastery-minimized",
+        handleMasteryMinimized as EventListener,
+      );
+    };
+  }, []);
 
   const showManageUsersTooltip = (e: React.MouseEvent) => {
     const el = e.currentTarget as HTMLElement;
@@ -249,6 +317,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onUpdate as EventListener,
       );
   }, []);
+
   const {
     isTourOpen,
     hasCompletedTour,
@@ -278,6 +347,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleChatClose = () => {
     setChatOpen(false);
     setChatMinimized(true);
+  };
+
+  const handleRestoreMastery = () => {
+    try {
+      localStorage.removeItem("valasys-mastery-minimized");
+    } catch (error) {}
+    setMasteryMinimized(false);
+    window.dispatchEvent(new Event("app:mastery-restored"));
   };
 
   const handleMobileNavigationClick = () => {
@@ -386,13 +463,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {coreNavigationItems.map((item) => {
                 const isActive = location.pathname === item.href;
                 const IconComponent = item.icon;
+                const isSubmenuOpen = expandedSubmenu === item.name;
+                const hasSubmenu =
+                  "submenu" in item && item.submenu && item.submenu.length > 0;
 
                 return (
                   <li key={item.name}>
-                    <Link
-                      to={item.href}
-                      data-tour={item.tourId}
-                      onClick={(e) => handleNavigationClick(item, e)}
+                    <div
                       className={cn(
                         "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
                         !isExpanded && "justify-center",
@@ -422,9 +499,84 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         </div>
                       )}
                       {isExpanded && (
-                        <span className="truncate">{item.name}</span>
+                        <>
+                          <Link
+                            to={item.href}
+                            data-tour={item.tourId}
+                            onClick={(e) => handleNavigationClick(item, e)}
+                            className="truncate flex-1"
+                          >
+                            {item.name}
+                          </Link>
+                          {hasSubmenu && (
+                            <button
+                              onClick={() =>
+                                setExpandedSubmenu(
+                                  isSubmenuOpen ? null : item.name,
+                                )
+                              }
+                              className="ml-auto p-1 hover:bg-white/10 rounded transition-colors"
+                              aria-label={
+                                isSubmenuOpen
+                                  ? "Collapse submenu"
+                                  : "Expand submenu"
+                              }
+                            >
+                              <ChevronDown
+                                className={cn(
+                                  "w-4 h-4 transition-transform",
+                                  isSubmenuOpen && "rotate-180",
+                                  isActive
+                                    ? "text-white"
+                                    : "text-valasys-gray-500",
+                                )}
+                              />
+                            </button>
+                          )}
+                        </>
                       )}
-                    </Link>
+                    </div>
+
+                    {hasSubmenu && isExpanded && isSubmenuOpen && (
+                      <ul className="ml-4 mt-1 space-y-1 border-l border-valasys-gray-200 pl-0">
+                        {item.submenu!.map((submenuItem) => {
+                          const isSubmenuActive =
+                            location.pathname === submenuItem.href;
+                          const SubMenuIconComponent = submenuItem.icon;
+
+                          return (
+                            <li key={submenuItem.name}>
+                              <Link
+                                to={submenuItem.href}
+                                data-tour={submenuItem.tourId}
+                                onClick={(e) =>
+                                  handleNavigationClick(submenuItem, e)
+                                }
+                                className={cn(
+                                  "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+                                  isSubmenuActive
+                                    ? "bg-valasys-orange text-white shadow-sm"
+                                    : "text-valasys-gray-600 hover:text-valasys-gray-900 hover:bg-valasys-gray-100",
+                                )}
+                                title={submenuItem.name}
+                              >
+                                <SubMenuIconComponent
+                                  className={cn(
+                                    "w-4 h-4 flex-shrink-0 mr-3",
+                                    isSubmenuActive
+                                      ? "text-white"
+                                      : "text-valasys-gray-500",
+                                  )}
+                                />
+                                <span className="truncate">
+                                  {submenuItem.name}
+                                </span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </li>
                 );
               })}
@@ -690,6 +842,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Right side - Notification, G2 Reviews, Profile */}
               <div className="flex items-center space-x-4">
                 <OnboardingSkipBadge />
+                <MasteryProgressBadge onClick={handleRestoreMastery} />
                 <div className="flex items-center space-x-3">
                   {/* Notification Dropdown */}
                   <div data-tour="notifications" className="relative">
@@ -1041,7 +1194,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content */}
         <main className="relative flex-1 p-6 overflow-auto">{children}</main>
-        <MasteryBottomBar />
       </div>
 
       {/* Manage Users Tooltip Portal (renders outside sidebar) */}
@@ -1200,6 +1352,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onClose={closeTour}
         onComplete={completeTour}
       />
+
+      {/* Mastery Bottom Bar */}
+      <MasteryBottomBar />
     </div>
   );
 }

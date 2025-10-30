@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/utils";
 import {
   calculateMasteryPercentage,
   getMastery,
   MasterySteps,
   MASTERY_EVENT,
+  emitMasteryUpdate,
 } from "@/lib/masteryStorage";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -40,8 +41,10 @@ import {
 } from "@/components/ui/dialog";
 import ConfettiCanvas from "@/components/onboarding/ConfettiCanvas";
 import { toast } from "@/components/ui/use-toast";
+import { useMasteryAnimation } from "@/contexts/MasteryAnimationContext";
 
 const MASTERY_DISMISS_KEY = "valasys-mastery-dismissed";
+const MASTERY_MINIMIZE_KEY = "valasys-mastery-minimized";
 
 // Map mastery step keys to human-readable labels for toasts
 const STEP_LABELS: Record<string, string> = {
@@ -63,11 +66,23 @@ type MasteryStepDefinition = {
 };
 
 export default function MasteryBottomBar() {
+  const { startAnimation, endAnimation, badgeRef, getBadgePosition } =
+    useMasteryAnimation();
   const [state, setState] = useState<MasterySteps>({});
   const [hidden, setHidden] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
-      return localStorage.getItem(MASTERY_DISMISS_KEY) === "1";
+      const isDismissed = localStorage.getItem(MASTERY_DISMISS_KEY) === "1";
+      const isFirstLoad = !localStorage.getItem("vais.mastery");
+      return isDismissed && !isFirstLoad;
+    } catch (error) {
+      return false;
+    }
+  });
+  const [minimized, setMinimized] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(MASTERY_MINIMIZE_KEY) === "1";
     } catch (error) {
       return false;
     }
@@ -75,6 +90,8 @@ export default function MasteryBottomBar() {
   const [expanded, setExpanded] = useState(false);
   const [openHints, setOpenHints] = useState<Record<string, boolean>>({});
   const [showDismissDialog, setShowDismissDialog] = useState(false);
+  const [isAnimatingMinimize, setIsAnimatingMinimize] = useState(false);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
   const toggleHint = (key: string) =>
     setOpenHints((s) => {
       const isOpen = !!s[key];
@@ -302,6 +319,30 @@ export default function MasteryBottomBar() {
     [],
   );
 
+  const handleMinimize = useCallback(() => {
+    setIsAnimatingMinimize(true);
+    startAnimation();
+    setExpanded(false);
+
+    // After animation completes, finalize the minimize
+    const animationDuration = 600; // Match the CSS animation duration
+    setTimeout(() => {
+      try {
+        localStorage.setItem(MASTERY_MINIMIZE_KEY, "1");
+      } catch (error) {}
+      setMinimized(true);
+      setIsAnimatingMinimize(false);
+      endAnimation();
+      window.dispatchEvent(
+        new CustomEvent("app:mastery-minimized", {
+          detail: { percent },
+        }) as Event,
+      );
+      // Emit mastery update to notify badge component immediately
+      emitMasteryUpdate(state);
+    }, animationDuration);
+  }, [percent, state, startAnimation, endAnimation, getBadgePosition]);
+
   if (hidden && !showDismissDialog && !showFinalDialog) {
     return null;
   }
@@ -321,7 +362,35 @@ export default function MasteryBottomBar() {
     } catch {}
   }, []);
 
-  const shouldShowPanel = !hidden && !doneAll;
+  useEffect(() => {
+    const handleMasteryRestored = () => {
+      try {
+        const isMinimized =
+          localStorage.getItem("valasys-mastery-minimized") === "1";
+        if (!isMinimized) {
+          setMinimized(false);
+          setHidden(false);
+        }
+      } catch {}
+    };
+
+    window.addEventListener(
+      "app:mastery-restored",
+      handleMasteryRestored as EventListener,
+    );
+    return () => {
+      window.removeEventListener(
+        "app:mastery-restored",
+        handleMasteryRestored as EventListener,
+      );
+    };
+  }, []);
+
+  const shouldShowPanel = !hidden && !doneAll && !minimized;
+  const [animationTarget, setAnimationTarget] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   useEffect(() => {
     if (showFinalDialog && showConfetti) {
@@ -332,15 +401,43 @@ export default function MasteryBottomBar() {
     setDialogBlast(0);
   }, [showFinalDialog, showConfetti]);
 
+  // Calculate target position when minimizing
+  useEffect(() => {
+    if (isAnimatingMinimize && bottomBarRef.current) {
+      // Use requestAnimationFrame to ensure DOM is updated
+      const frameId = requestAnimationFrame(() => {
+        const badgePos = getBadgePosition();
+        const bottomBarRect = bottomBarRef.current?.getBoundingClientRect();
+
+        if (badgePos && bottomBarRect) {
+          // Calculate the delta between bottom bar center and badge center
+          const deltaX =
+            badgePos.x - (bottomBarRect.left + bottomBarRect.width / 2);
+          const deltaY =
+            badgePos.y - (bottomBarRect.top + bottomBarRect.height / 2);
+
+          setAnimationTarget({ x: deltaX, y: deltaY });
+        }
+      });
+
+      return () => cancelAnimationFrame(frameId);
+    }
+  }, [isAnimatingMinimize, getBadgePosition]);
+
   return (
     <>
       {/* Confetti celebration moved inside dialog to blast from behind modal (two times) */}
 
       {shouldShowPanel && (
-        <div className="fixed inset-x-0 bottom-4 z-50 pointer-events-none">
+        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
           <div
-            className="mx-auto w-[min(92vw,520px)] pointer-events-auto"
+            className="mx-auto w-full pointer-events-auto px-4 sm:px-6 pb-4"
             onMouseLeave={handleCloseGuide}
+            style={{
+              maxWidth: "min(92vw, 520px)",
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
           >
             {/* Slide-up panel */}
             <AnimatePresence initial={false}>
@@ -501,21 +598,42 @@ export default function MasteryBottomBar() {
             )}
 
             {/* Bottom orange bar */}
-            <div
-              className="relative flex flex-col gap-1 rounded-xl shadow-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-valasys-orange to-valasys-orange-light text-white cursor-pointer"
+            <motion.div
+              ref={bottomBarRef}
+              className="relative flex flex-col gap-1 rounded-xl shadow-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-valasys-orange to-valasys-orange-light text-white cursor-pointer hover:opacity-95 transition-opacity"
               role="button"
               tabIndex={0}
               aria-expanded={expanded}
-              onClick={handleOpenGuide}
-              onMouseEnter={handleOpenGuide}
+              onClick={!isAnimatingMinimize ? handleOpenGuide : undefined}
+              onMouseEnter={!isAnimatingMinimize ? handleOpenGuide : undefined}
               onKeyDown={handleGuideKeyDown}
+              animate={
+                isAnimatingMinimize && animationTarget
+                  ? {
+                      x: animationTarget.x,
+                      y: animationTarget.y,
+                      scale: 0.2,
+                      opacity: 0,
+                    }
+                  : {
+                      x: 0,
+                      y: 0,
+                      scale: 1,
+                      opacity: 1,
+                    }
+              }
+              transition={{
+                duration: 0.6,
+                ease: "easeInOut",
+              }}
             >
               {showStepConfetti && (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
                   <ConfettiCanvas duration={1400} mode="blast" />
                 </div>
               )}
-              {/* Top row: progress, chevron, close */}
+
+              {/* Top row: progress, chevron, collapse, close */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-3">
@@ -542,6 +660,17 @@ export default function MasteryBottomBar() {
                   loading="lazy"
                 />
                 <button
+                  aria-label="Minimize"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleMinimize();
+                  }}
+                  className="ml-1 rounded-md hover:opacity-90"
+                  title="Minimize"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button
                   aria-label="Hide for now"
                   onClick={(event) => {
                     event.stopPropagation();
@@ -556,10 +685,12 @@ export default function MasteryBottomBar() {
               </div>
 
               {/* Bottom text */}
-              <div className="text-center text-[12px] font-semibold">
-                Your VAIS mastery: {percent}%
-              </div>
-            </div>
+              {!isAnimatingMinimize && (
+                <div className="text-center text-[12px] font-semibold">
+                  Your VAIS mastery: {percent}%
+                </div>
+              )}
+            </motion.div>
           </div>
         </div>
       )}

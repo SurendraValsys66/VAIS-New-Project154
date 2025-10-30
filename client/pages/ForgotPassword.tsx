@@ -18,7 +18,7 @@ import {
 import AssociationPartners from "@/components/auth/AssociationPartners";
 import IntegrationsFooter from "@/components/auth/IntegrationsFooter";
 
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/utils";
 
 export default function ForgotPassword() {
   const [mounted, setMounted] = useState(false);

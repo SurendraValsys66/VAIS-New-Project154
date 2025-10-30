@@ -36,6 +36,7 @@ interface PaymentRow {
   invoiceId: string;
   paymentMethod: string; // e.g., Mastercard **** 1887
   type: string; // e.g., Subscription, Add-on
+  plan: string; // e.g., Growth Plan, Scale Plan, Custom Plan
   currency: string; // e.g., USD
   invoiceAmount: number; // numeric amount
   serviceProvider: string; // e.g., Stripe
@@ -48,6 +49,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-091-001",
     paymentMethod: "Mastercard **** 1887",
     type: "Subscription",
+    plan: "Growth Plan",
     currency: "USD",
     invoiceAmount: 660,
     serviceProvider: "Stripe",
@@ -58,6 +60,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-081-002",
     paymentMethod: "Visa **** 4421",
     type: "Subscription",
+    plan: "Scale Plan",
     currency: "USD",
     invoiceAmount: 660,
     serviceProvider: "Stripe",
@@ -68,6 +71,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-071-003",
     paymentMethod: "Amex **** 3012",
     type: "Add-on Credits",
+    plan: "Custom Plan",
     currency: "USD",
     invoiceAmount: 120,
     serviceProvider: "Stripe",
@@ -78,6 +82,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-061-004",
     paymentMethod: "UPI **** 3289",
     type: "Subscription",
+    plan: "Growth Plan",
     currency: "INR",
     invoiceAmount: 5499,
     serviceProvider: "Razorpay",
@@ -88,6 +93,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-051-005",
     paymentMethod: "PayPal john.doe@email.com",
     type: "Subscription",
+    plan: "Scale Plan",
     currency: "USD",
     invoiceAmount: 660,
     serviceProvider: "PayPal",
@@ -98,6 +104,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-041-006",
     paymentMethod: "Visa **** 9301",
     type: "Add-on Credits",
+    plan: "Custom Plan",
     currency: "USD",
     invoiceAmount: 220,
     serviceProvider: "Stripe",
@@ -108,6 +115,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-031-007",
     paymentMethod: "Mastercard **** 1887",
     type: "Subscription",
+    plan: "Growth Plan",
     currency: "USD",
     invoiceAmount: 660,
     serviceProvider: "Stripe",
@@ -118,6 +126,7 @@ const rows: PaymentRow[] = [
     invoiceId: "INV-2025-021-008",
     paymentMethod: "NetBanking ICICI",
     type: "Add-on Credits",
+    plan: "Scale Plan",
     currency: "INR",
     invoiceAmount: 2999,
     serviceProvider: "Razorpay",
@@ -132,6 +141,7 @@ function downloadInvoice(row: PaymentRow) {
     `Date: ${row.transactionDate}`,
     `Payment Method: ${row.paymentMethod}`,
     `Type: ${row.type}`,
+    `Plan: ${row.plan}`,
     `Currency: ${row.currency}`,
     `Amount: ${row.invoiceAmount}`,
     `Service Provider: ${row.serviceProvider}`,
@@ -170,6 +180,7 @@ type SortField =
   | "invoiceId"
   | "paymentMethod"
   | "type"
+  | "plan"
   | "currency"
   | "invoiceAmount"
   | "serviceProvider";
@@ -179,11 +190,17 @@ type SortDir = "asc" | "desc";
 export default function Payments() {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [planFilter, setPlanFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>("transactionDate");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const uniqueTypes = useMemo(
     () => Array.from(new Set(rows.map((r) => r.type))).sort(),
+    [],
+  );
+
+  const uniquePlans = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.plan))).sort(),
     [],
   );
 
@@ -196,13 +213,14 @@ export default function Payments() {
     return rows.filter((r) => {
       const q = query.trim().toLowerCase();
       const matchesQuery = q
-        ? [r.invoiceId, r.paymentMethod, r.type, r.serviceProvider]
+        ? [r.invoiceId, r.paymentMethod, r.type, r.plan, r.serviceProvider]
             .join(" ")
             .toLowerCase()
             .includes(q)
         : true;
 
       const matchesType = typeFilter === "all" ? true : r.type === typeFilter;
+      const matchesPlan = planFilter === "all" ? true : r.plan === planFilter;
 
       let inRange = true;
       if (dateRange?.from && dateRange?.to) {
@@ -212,9 +230,9 @@ export default function Payments() {
         inRange = t >= dateRange.from.getTime() && t <= dateRange.to.getTime();
       }
 
-      return matchesQuery && matchesType && inRange;
+      return matchesQuery && matchesType && matchesPlan && inRange;
     });
-  }, [query, typeFilter, dateRange]);
+  }, [query, typeFilter, planFilter, dateRange]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -234,6 +252,8 @@ export default function Payments() {
             return r.paymentMethod.toLowerCase();
           case "type":
             return r.type.toLowerCase();
+          case "plan":
+            return r.plan.toLowerCase();
           case "currency":
             return r.currency.toLowerCase();
           case "serviceProvider":
@@ -267,6 +287,7 @@ export default function Payments() {
   const resetFilters = () => {
     setQuery("");
     setTypeFilter("all");
+    setPlanFilter("all");
     setDateRange(undefined);
     setPickerValue(null);
   };
@@ -322,7 +343,7 @@ export default function Payments() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-grow">
+              <div className="w-full flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
@@ -334,7 +355,7 @@ export default function Payments() {
                   />
                 </div>
               </div>
-              <div className="w-full md:w-auto">
+              <div className="w-full flex-1">
                 <RsuiteDateRangePicker
                   value={pickerValue as any}
                   onChange={(val) => setPickerValue(val as any)}
@@ -356,7 +377,7 @@ export default function Payments() {
                   style={{ width: "100%" }}
                 />
               </div>
-              <div className="w-full md:w-auto">
+              <div className="w-full flex-1">
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="All Types" />
@@ -366,6 +387,21 @@ export default function Payments() {
                     {uniqueTypes.map((t) => (
                       <SelectItem key={t} value={t}>
                         {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-full flex-1">
+                <Select value={planFilter} onValueChange={setPlanFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Plans" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Plans</SelectItem>
+                    {uniquePlans.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -411,6 +447,9 @@ export default function Payments() {
                     <TableHead className="min-w-[140px]">
                       <HeaderSort label="Type" field="type" />
                     </TableHead>
+                    <TableHead className="min-w-[140px]">
+                      <HeaderSort label="Plan" field="plan" />
+                    </TableHead>
                     <TableHead className="min-w-[120px]">
                       <HeaderSort label="Currency" field="currency" />
                     </TableHead>
@@ -452,6 +491,9 @@ export default function Payments() {
                         {row.type}
                       </TableCell>
                       <TableCell className="text-sm text-gray-700">
+                        {row.plan}
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-700">
                         {row.currency}
                       </TableCell>
                       <TableCell className="text-right font-medium text-gray-900">
@@ -467,7 +509,7 @@ export default function Payments() {
                   {sorted.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={8}
                         className="text-center py-8 text-sm text-gray-500"
                       >
                         No transactions match your filters.

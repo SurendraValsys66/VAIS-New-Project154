@@ -67,10 +67,10 @@ import {
   Lock,
   ArrowUp,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { markStepCompleted } from "@/lib/masteryStorage";
-import { cn } from "@/lib/utils";
+import { cn, Link } from "@/lib/utils";
 import IntentSignalChart from "@/components/dashboard/IntentSignalChart";
+import UnlockIntentSignalModal from "@/components/dashboard/UnlockIntentSignalModal";
 
 interface CompanyData {
   id: string;
@@ -375,7 +375,7 @@ export default function VAISResults() {
   const [data, setData] = useState<CompanyData[]>(sampleData);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<keyof CompanyData>("vais");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -391,6 +391,11 @@ export default function VAISResults() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [activeCompany, setActiveCompany] = useState<CompanyData | null>(null);
   const [isSmall, setIsSmall] = useState(false);
+  const [unlockedBadges, setUnlockedBadges] = useState<Set<string>>(new Set());
+  const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+  const [currentlyClickedBadgeId, setCurrentlyClickedBadgeId] = useState<
+    string | null
+  >(null);
 
   // Mark VAIS results as generated when viewing this page
   useEffect(() => {
@@ -573,6 +578,22 @@ export default function VAISResults() {
       default:
         return "bg-gray-100 text-gray-800 border border-gray-200";
     }
+  };
+
+  const handleBadgeLockClick = (companyId: string) => {
+    setCurrentlyClickedBadgeId(companyId);
+    setUnlockModalOpen(true);
+  };
+
+  const handleUnlockCurrent = () => {
+    if (currentlyClickedBadgeId) {
+      setUnlockedBadges((prev) => new Set([...prev, currentlyClickedBadgeId]));
+    }
+  };
+
+  const handleUnlockAll = () => {
+    const allBadgeIds = paginatedData.map((item) => item.id);
+    setUnlockedBadges((prev) => new Set([...prev, ...allBadgeIds]));
   };
 
   const PremiumOverlay = () => (
@@ -873,15 +894,35 @@ export default function VAISResults() {
                     {selectedItems.length} Items Selected
                   </Badge>
                 </div>
-                <Button
-                  size="sm"
-                  className="bg-valasys-orange hover:bg-valasys-orange/90"
-                  disabled={selectedItems.length === 0 || isPremiumPage}
-                  onClick={() => markStepCompleted("accountsDownloaded")}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(parseInt(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="500">500</SelectItem>
+                      <SelectItem value="1000">1000</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="sm"
+                    className="bg-valasys-orange hover:bg-valasys-orange/90"
+                    disabled={selectedItems.length === 0 || isPremiumPage}
+                    onClick={() => markStepCompleted("accountsDownloaded")}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -953,7 +994,7 @@ export default function VAISResults() {
                             <div className="ml-2">
                               {sortField === "intentSignal" ? (
                                 <span className="text-valasys-orange">
-                                  {sortDirection === "asc" ? "↑" : "↓"}
+                                  {sortDirection === "asc" ? "���" : "↓"}
                                 </span>
                               ) : (
                                 <span className="text-gray-400">↕</span>
@@ -1168,6 +1209,10 @@ export default function VAISResults() {
                                     city: item.city,
                                     relatedTopics: item.relatedTopics,
                                   }}
+                                  isLocked={!unlockedBadges.has(item.id)}
+                                  onLockClick={() =>
+                                    handleBadgeLockClick(item.id)
+                                  }
                                 />
                               </TableCell>
                             )}
@@ -1720,6 +1765,13 @@ export default function VAISResults() {
           </div>
         </div>
       </div>
+
+      <UnlockIntentSignalModal
+        open={unlockModalOpen}
+        onOpenChange={setUnlockModalOpen}
+        onUnlockCurrent={handleUnlockCurrent}
+        onUnlockAll={handleUnlockAll}
+      />
     </DashboardLayout>
   );
 }

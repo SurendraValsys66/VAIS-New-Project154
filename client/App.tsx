@@ -10,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TourProvider } from "./contexts/TourContext";
+import { MasteryAnimationProvider } from "./contexts/MasteryAnimationContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -18,6 +19,7 @@ import VAISResults from "./pages/VAISResults";
 import ABMLAL from "./pages/ABMLAL";
 import FindProspect from "./pages/FindProspect";
 import ProspectResults from "./pages/ProspectResults";
+import FavoritesProspects from "./pages/FavoritesProspects";
 import BuildCampaign from "./pages/BuildCampaign";
 import BuildMyCampaign from "./pages/BuildMyCampaign";
 import CampaignOverview from "./pages/CampaignOverview";
@@ -59,73 +61,85 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <TourProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/free-trial" element={<FreeTrial />} />
-              <Route path="/create-account" element={<CreateAccount />} />
-              <Route
-                path="/email-verification"
-                element={<EmailVerification />}
-              />
-              <Route path="/build-vais" element={<BuildVAIS />} />
-              <Route path="/vais-results" element={<VAISResults />} />
-              <Route path="/abm-lal" element={<ABMLAL />} />
-              <Route path="/find-prospect" element={<FindProspect />} />
-              <Route path="/prospect-results" element={<ProspectResults />} />
-              <Route path="/build-campaign" element={<BuildCampaign />} />
-              <Route path="/build-my-campaign" element={<BuildMyCampaign />} />
-              <Route
-                path="/campaign-overview/:id"
-                element={<CampaignOverview />}
-              />
-              <Route path="/my-downloads" element={<MyDownloadedList />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="/manage-users" element={<Users />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/chat-support/:ticketId" element={<ChatSupport />} />
-              <Route path="/faqs" element={<FAQs />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/subscription" element={<Subscription />} />
-              <Route path="/payments" element={<Payments />} />
-              <Route path="/contact-sales" element={<ContactSales />} />
-              <Route path="/notifications" element={<AllNotifications />} />
-              <Route path="/spending-history" element={<SpendingHistory />} />
-              <Route path="/integrations" element={<Integrations />} />
-              <Route path="/mastery" element={<MasteryGuide />} />
+          <MasteryAnimationProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/free-trial" element={<FreeTrial />} />
+                <Route path="/create-account" element={<CreateAccount />} />
+                <Route
+                  path="/email-verification"
+                  element={<EmailVerification />}
+                />
+                <Route path="/build-vais" element={<BuildVAIS />} />
+                <Route path="/vais-results" element={<VAISResults />} />
+                <Route path="/abm-lal" element={<ABMLAL />} />
+                <Route path="/find-prospect" element={<FindProspect />} />
+                <Route path="/prospect-results" element={<ProspectResults />} />
+                <Route
+                  path="/favorites-prospects"
+                  element={<FavoritesProspects />}
+                />
+                <Route path="/build-campaign" element={<BuildCampaign />} />
+                <Route
+                  path="/build-my-campaign"
+                  element={<BuildMyCampaign />}
+                />
+                <Route
+                  path="/campaign-overview/:id"
+                  element={<CampaignOverview />}
+                />
+                <Route path="/my-downloads" element={<MyDownloadedList />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/manage-users" element={<Users />} />
+                <Route path="/support" element={<Support />} />
+                <Route
+                  path="/chat-support/:ticketId"
+                  element={<ChatSupport />}
+                />
+                <Route path="/faqs" element={<FAQs />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/subscription" element={<Subscription />} />
+                <Route path="/payments" element={<Payments />} />
+                <Route path="/contact-sales" element={<ContactSales />} />
+                <Route path="/notifications" element={<AllNotifications />} />
+                <Route path="/spending-history" element={<SpendingHistory />} />
+                <Route path="/integrations" element={<Integrations />} />
+                <Route path="/mastery" element={<MasteryGuide />} />
 
-              {/* Onboarding flow */}
-              <Route path="/onboarding/role" element={<OnboardingRole />} />
-              <Route
-                path="/onboarding/use-case"
-                element={<OnboardingUseCase />}
-              />
-              <Route
-                path="/onboarding/experience"
-                element={<OnboardingExperience />}
-              />
-              <Route
-                path="/onboarding/industry"
-                element={<OnboardingIndustry />}
-              />
-              <Route
-                path="/onboarding/category"
-                element={<OnboardingCategory />}
-              />
-              <Route
-                path="/onboarding/complete"
-                element={<OnboardingThankYou />}
-              />
+                {/* Onboarding flow */}
+                <Route path="/onboarding/role" element={<OnboardingRole />} />
+                <Route
+                  path="/onboarding/use-case"
+                  element={<OnboardingUseCase />}
+                />
+                <Route
+                  path="/onboarding/experience"
+                  element={<OnboardingExperience />}
+                />
+                <Route
+                  path="/onboarding/industry"
+                  element={<OnboardingIndustry />}
+                />
+                <Route
+                  path="/onboarding/category"
+                  element={<OnboardingCategory />}
+                />
+                <Route
+                  path="/onboarding/complete"
+                  element={<OnboardingThankYou />}
+                />
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </MasteryAnimationProvider>
         </TourProvider>
       </TooltipProvider>
     </QueryClientProvider>

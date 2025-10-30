@@ -82,8 +82,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { cn, Link } from "@/lib/utils";
 import { FloatingStatsWidget } from "@/components/ui/floating-stats-widget";
 import { markStepCompleted } from "@/lib/masteryStorage";
 import { useToast } from "@/hooks/use-toast";
@@ -569,7 +568,7 @@ export default function ProspectResults() {
   const [data, setData] = useState<ProspectData[]>(initialProspects);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] =
     useState<keyof ProspectData>("engagementScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -599,6 +598,8 @@ export default function ProspectResults() {
   useEffect(() => {
     try {
       localStorage.setItem("prospect:favorites", JSON.stringify(favorites));
+      // Dispatch event to notify sidebar of favorites update
+      window.dispatchEvent(new CustomEvent("app:favorites-updated"));
     } catch {}
   }, [favorites]);
 
@@ -672,7 +673,7 @@ export default function ProspectResults() {
     mainIndustry: true,
     country: true,
     contactInfo: true,
-    actions: true,
+    actions: false,
   });
 
   const dummyProfile = useMemo(
@@ -1233,6 +1234,27 @@ export default function ProspectResults() {
                   </Badge>
                 </div>
                 <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600 font-medium">
+                    Total items shows
+                  </span>
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(parseInt(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="500">500</SelectItem>
+                      <SelectItem value="1000">1000</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -1573,7 +1595,7 @@ export default function ProspectResults() {
                                       {prospect.lastName[0]}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <div>
+                                  <div className="flex-1">
                                     <div className="font-medium text-gray-900">
                                       {prospect.fullName}
                                     </div>
@@ -1595,6 +1617,44 @@ export default function ProspectResults() {
                                       </Badge>
                                     </div>
                                   </div>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        aria-label={
+                                          isFavorite(prospect.id)
+                                            ? "Remove favorite"
+                                            : "Add favorite"
+                                        }
+                                        onClick={() =>
+                                          toggleFavorite(
+                                            prospect.id,
+                                            prospect.fullName,
+                                          )
+                                        }
+                                      >
+                                        <Star
+                                          className={cn(
+                                            "w-4 h-4",
+                                            isFavorite(prospect.id)
+                                              ? "text-yellow-500"
+                                              : "text-gray-500",
+                                          )}
+                                          fill={
+                                            isFavorite(prospect.id)
+                                              ? "currentColor"
+                                              : "none"
+                                          }
+                                        />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {isFavorite(prospect.id)
+                                        ? "Unfavorite"
+                                        : "Add to favorites"}
+                                    </TooltipContent>
+                                  </Tooltip>
                                 </div>
                               </TableCell>
                             )}
@@ -1665,271 +1725,217 @@ export default function ProspectResults() {
                             {/* Contact Info (masked) */}
                             {columnVisibility.contactInfo && (
                               <TableCell>
-                                <div className="space-y-1">
-                                  <div className="flex items-center text-sm">
-                                    <Mail className="w-3 h-3 mr-1 text-gray-400" />
-                                    <a
-                                      href={`mailto:${prospect.email}`}
-                                      className="text-blue-600 hover:underline truncate max-w-[180px]"
-                                    >
-                                      {maskEmail(prospect.email)}
-                                    </a>
-                                  </div>
-                                  {prospect.phone && (
-                                    <div className="flex items-center text-sm text-gray-600">
-                                      <Phone className="w-3 h-3 mr-1 text-gray-400" />
-                                      {maskPhone(prospect.phone)}
-                                    </div>
-                                  )}
-                                  {prospect.linkedinUrl && (
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-1 flex-1">
                                     <div className="flex items-center text-sm">
-                                      <Linkedin className="w-3 h-3 mr-1 text-blue-600" />
+                                      <Mail className="w-3 h-3 mr-1 text-gray-400" />
                                       <a
-                                        href={prospect.linkedinUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href={`mailto:${prospect.email}`}
                                         className="text-blue-600 hover:underline truncate max-w-[180px]"
                                       >
-                                        {maskLinkedInText(prospect.linkedinUrl)}
+                                        {maskEmail(prospect.email)}
                                       </a>
                                     </div>
-                                  )}
-                                  <div className="flex items-center text-xs text-gray-500">
-                                    <MapPin className="w-3 h-3 mr-1" />
-                                    {prospect.city}, {prospect.country}
+                                    {prospect.phone && (
+                                      <div className="flex items-center text-sm text-gray-600">
+                                        <Phone className="w-3 h-3 mr-1 text-gray-400" />
+                                        {maskPhone(prospect.phone)}
+                                      </div>
+                                    )}
+                                    {prospect.linkedinUrl && (
+                                      <div className="flex items-center text-sm">
+                                        <Linkedin className="w-3 h-3 mr-1 text-blue-600" />
+                                        <a
+                                          href={prospect.linkedinUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:underline truncate max-w-[180px]"
+                                        >
+                                          {maskLinkedInText(
+                                            prospect.linkedinUrl,
+                                          )}
+                                        </a>
+                                      </div>
+                                    )}
+                                    <div className="flex items-center text-xs text-gray-500">
+                                      <MapPin className="w-3 h-3 mr-1" />
+                                      {prospect.city}, {prospect.country}
+                                    </div>
                                   </div>
-                                </div>
-                              </TableCell>
-                            )}
-
-                            {/* Actions */}
-                            {columnVisibility.actions && (
-                              <TableCell>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      aria-label={
-                                        isFavorite(prospect.id)
-                                          ? "Remove favorite"
-                                          : "Add favorite"
-                                      }
-                                      onClick={() =>
-                                        toggleFavorite(
-                                          prospect.id,
-                                          prospect.fullName,
-                                        )
-                                      }
-                                    >
-                                      <Star
-                                        className={cn(
-                                          "w-4 h-4",
-                                          isFavorite(prospect.id)
-                                            ? "text-yellow-500"
-                                            : "text-gray-500",
-                                        )}
-                                        fill={
-                                          isFavorite(prospect.id)
-                                            ? "currentColor"
-                                            : "none"
-                                        }
-                                      />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {isFavorite(prospect.id)
-                                      ? "Unfavorite"
-                                      : "Add to favorites"}
-                                  </TooltipContent>
-                                </Tooltip>
-
-                                <Sheet>
-                                  <SheetTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        setSelectedProspect(prospect)
-                                      }
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                  </SheetTrigger>
-                                  <SheetContent
-                                    side="right"
-                                    className="sm:max-w-md md:max-w-lg lg:max-w-xl w-[90vw] h-screen overflow-y-auto"
-                                  >
-                                    <SheetHeader>
-                                      <SheetTitle className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                          <Avatar className="h-12 w-12">
-                                            <AvatarImage
-                                              src={prospect.profileImageUrl}
-                                              alt={prospect.fullName}
-                                            />
-                                            <AvatarFallback className="bg-valasys-orange text-white">
-                                              {prospect.firstName[0]}
-                                              {prospect.lastName[0]}
-                                            </AvatarFallback>
-                                          </Avatar>
-                                          <div>
-                                            <div className="text-xl font-bold">
-                                              Prospect Name
-                                            </div>
-                                            <div className="text-sm text-gray-600 font-normal">
-                                              Chief Technology Officer at Acme
-                                              Corp
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <Badge
-                                            variant="secondary"
-                                            className={cn(
-                                              "border",
-                                              getIntentSignalColor(
-                                                prospect.intentSignal,
-                                              ),
-                                            )}
-                                          >
-                                            {prospect.intentSignal}
-                                          </Badge>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                aria-label={
-                                                  isFavorite(prospect.id)
-                                                    ? "Remove favorite"
-                                                    : "Add favorite"
-                                                }
-                                                onClick={() =>
-                                                  toggleFavorite(
-                                                    prospect.id,
-                                                    prospect.fullName,
-                                                  )
-                                                }
-                                              >
-                                                <Star
-                                                  className={cn(
-                                                    "w-4 h-4",
-                                                    isFavorite(prospect.id)
-                                                      ? "text-yellow-500"
-                                                      : "text-gray-500",
-                                                  )}
-                                                  fill={
-                                                    isFavorite(prospect.id)
-                                                      ? "currentColor"
-                                                      : "none"
-                                                  }
-                                                />
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              {isFavorite(prospect.id)
-                                                ? "Unfavorite"
-                                                : "Add to favorites"}
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </div>
-                                      </SheetTitle>
-                                      <SheetDescription>
-                                        Detailed prospect information and
-                                        engagement data
-                                      </SheetDescription>
-                                    </SheetHeader>
-
-                                    {selectedProspect && (
-                                      <div className="space-y-6">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                          <Button variant="outline" size="sm">
-                                            CRM
-                                          </Button>
-                                          <Button variant="outline" size="sm">
-                                            List
-                                          </Button>
-                                          <Button variant="outline" size="sm">
-                                            Sequence
-                                          </Button>
+                                  <Sheet>
+                                    <SheetTrigger asChild>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
                                           <Button
                                             variant="ghost"
-                                            size="icon"
-                                            aria-label="More"
+                                            size="sm"
+                                            aria-label="View details"
+                                            onClick={() =>
+                                              setSelectedProspect(prospect)
+                                            }
                                           >
-                                            <MoreVertical className="w-4 h-4" />
+                                            <Eye className="w-4 h-4 text-gray-500 hover:text-gray-700" />
                                           </Button>
-                                        </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          View details
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </SheetTrigger>
+                                    <SheetContent
+                                      side="right"
+                                      className="sm:max-w-md md:max-w-lg lg:max-w-xl w-[90vw] h-screen overflow-y-auto"
+                                    >
+                                      <SheetHeader>
+                                        <SheetTitle className="flex items-center justify-between">
+                                          <div className="flex items-center space-x-3">
+                                            <Avatar className="h-12 w-12">
+                                              <AvatarImage
+                                                src={prospect.profileImageUrl}
+                                                alt={prospect.fullName}
+                                              />
+                                              <AvatarFallback className="bg-valasys-orange text-white">
+                                                {prospect.firstName[0]}
+                                                {prospect.lastName[0]}
+                                              </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                              <div className="text-xl font-bold">
+                                                {prospect.fullName}
+                                              </div>
+                                              <div className="text-sm text-gray-600 font-normal">
+                                                {prospect.jobTitle} at{" "}
+                                                {prospect.companyName}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Badge
+                                              variant="secondary"
+                                              className={cn(
+                                                "border",
+                                                getIntentSignalColor(
+                                                  prospect.intentSignal,
+                                                ),
+                                              )}
+                                            >
+                                              {prospect.intentSignal}
+                                            </Badge>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  aria-label={
+                                                    isFavorite(prospect.id)
+                                                      ? "Remove favorite"
+                                                      : "Add favorite"
+                                                  }
+                                                  onClick={() =>
+                                                    toggleFavorite(
+                                                      prospect.id,
+                                                      prospect.fullName,
+                                                    )
+                                                  }
+                                                >
+                                                  <Star
+                                                    className={cn(
+                                                      "w-4 h-4",
+                                                      isFavorite(prospect.id)
+                                                        ? "text-yellow-500"
+                                                        : "text-gray-500",
+                                                    )}
+                                                    fill={
+                                                      isFavorite(prospect.id)
+                                                        ? "currentColor"
+                                                        : "none"
+                                                    }
+                                                  />
+                                                </Button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                {isFavorite(prospect.id)
+                                                  ? "Unfavorite"
+                                                  : "Add to favorites"}
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          </div>
+                                        </SheetTitle>
+                                        <SheetDescription>
+                                          Detailed prospect information and
+                                          engagement data
+                                        </SheetDescription>
+                                      </SheetHeader>
 
+                                      <div className="space-y-6">
                                         <div className="space-y-3">
                                           <a
-                                            href="#"
+                                            href={prospect.linkedinUrl || "#"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="inline-flex items-center text-sm text-blue-600 hover:underline"
                                           >
                                             <Linkedin className="w-4 h-4 mr-2" />{" "}
                                             LinkedIn profile
                                           </a>
                                           <div className="space-y-2">
-                                            {dummyProfile.phones.map(
-                                              (p, idx) => (
-                                                <div
-                                                  key={idx}
-                                                  className="flex items-center justify-between text-sm"
-                                                >
-                                                  <div className="flex items-center">
-                                                    <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                                                    <span>{p}</span>
-                                                  </div>
-                                                  <div className="flex items-center gap-2">
-                                                    <Tooltip>
-                                                      <TooltipTrigger asChild>
-                                                        <Button
-                                                          variant="outline"
-                                                          size="icon"
-                                                          onClick={() =>
-                                                            handleCopy(
-                                                              p,
-                                                              "Phone",
-                                                            )
-                                                          }
-                                                          aria-label="Copy phone"
-                                                        >
-                                                          <Copy className="w-4 h-4" />
-                                                        </Button>
-                                                      </TooltipTrigger>
-                                                      <TooltipContent>
-                                                        Copy
-                                                      </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                      <TooltipTrigger asChild>
-                                                        <Button
-                                                          size="icon"
-                                                          asChild
-                                                          aria-label="Call"
-                                                        >
-                                                          <a href={`tel:${p}`}>
-                                                            <Phone className="w-4 h-4" />
-                                                          </a>
-                                                        </Button>
-                                                      </TooltipTrigger>
-                                                      <TooltipContent>
-                                                        Call
-                                                      </TooltipContent>
-                                                    </Tooltip>
-                                                  </div>
+                                            {prospect.phone && (
+                                              <div className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center">
+                                                  <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                                                  <span>{prospect.phone}</span>
                                                 </div>
-                                              ),
+                                                <div className="flex items-center gap-2">
+                                                  <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                      <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                          handleCopy(
+                                                            prospect.phone,
+                                                            "Phone",
+                                                          )
+                                                        }
+                                                        aria-label="Copy phone"
+                                                      >
+                                                        <Copy className="w-4 h-4" />
+                                                      </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      Copy
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                  <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                      <Button
+                                                        size="icon"
+                                                        asChild
+                                                        aria-label="Call"
+                                                      >
+                                                        <a
+                                                          href={`tel:${prospect.phone}`}
+                                                        >
+                                                          <Phone className="w-4 h-4" />
+                                                        </a>
+                                                      </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      Call
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                </div>
+                                              </div>
                                             )}
                                             <div className="flex items-center justify-between text-sm">
                                               <div className="flex items-center">
                                                 <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                                                <span>
-                                                  {maskEmail(
-                                                    dummyProfile.email,
-                                                  )}
-                                                </span>
+                                                <a
+                                                  href={`mailto:${prospect.email}`}
+                                                  className="text-blue-600 hover:underline"
+                                                >
+                                                  {prospect.email}
+                                                </a>
                                               </div>
                                               <div className="flex items-center gap-2">
                                                 <Tooltip>
@@ -1939,7 +1945,7 @@ export default function ProspectResults() {
                                                       size="icon"
                                                       onClick={() =>
                                                         handleCopy(
-                                                          dummyProfile.email,
+                                                          prospect.email,
                                                           "Email",
                                                         )
                                                       }
@@ -1957,7 +1963,7 @@ export default function ProspectResults() {
                                                     <Button
                                                       size="icon"
                                                       onClick={() =>
-                                                        (window.location.href = `mailto:${dummyProfile.email}`)
+                                                        (window.location.href = `mailto:${prospect.email}`)
                                                       }
                                                       aria-label="Send email"
                                                     >
@@ -1979,7 +1985,7 @@ export default function ProspectResults() {
                                               Seniority
                                             </div>
                                             <div className="text-sm">
-                                              {dummyProfile.seniority}
+                                              {prospect.jobLevel}
                                             </div>
                                           </div>
                                           <div>
@@ -1987,81 +1993,86 @@ export default function ProspectResults() {
                                               Department
                                             </div>
                                             <div className="text-sm">
-                                              {dummyProfile.department}
+                                              {prospect.department || "N/A"}
                                             </div>
                                           </div>
                                           <div>
                                             <div className="text-xs uppercase text-gray-500">
-                                              Contact location
+                                              Location
                                             </div>
                                             <div className="text-sm">
-                                              {dummyProfile.contactLocation}
+                                              {prospect.city},{" "}
+                                              {prospect.country}
                                             </div>
                                           </div>
                                         </div>
-                                        <div className="rounded-xl border bg-gradient-to-r from-valasys-orange/10 via-orange-200/10 to-blue-200/10 p-4">
-                                          <div className="flex flex-wrap items-center gap-4 justify-between">
-                                            <div className="flex items-center gap-2">
-                                              <Activity className="w-4 h-4 text-green-600" />
-                                              <span className="text-sm text-gray-700">
-                                                Engagement:
-                                              </span>
-                                              <span className="font-semibold text-green-700">
-                                                {
-                                                  selectedProspect.engagementScore
-                                                }
-                                              </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <Target className="w-4 h-4 text-blue-600" />
-                                              <span className="text-sm text-gray-700">
-                                                Intent:
-                                              </span>
-                                              <span className="font-semibold text-blue-700">
-                                                {selectedProspect.intentScore}
-                                              </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <CheckCircle className="w-4 h-4 text-orange-600" />
-                                              <span className="text-sm text-gray-700">
-                                                Confidence:
-                                              </span>
-                                              <span className="font-semibold text-orange-700">
-                                                {
-                                                  selectedProspect.confidenceScore
-                                                }
-                                                %
-                                              </span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                              <Clock className="w-4 h-4" />
-                                              Last activity{" "}
-                                              {formatDate(
-                                                selectedProspect.lastActivity,
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        {/* Contact & Professional Info */}
-                                        <div className="space-y-6">
-                                          <Card>
-                                            <CardHeader className="pb-3">
-                                              <CardTitle className="text-sm">
-                                                Contact Information
-                                              </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-4">
-                                              <div className="space-y-3">
+
+                                        <Card>
+                                          <CardHeader className="pb-3">
+                                            <CardTitle className="text-sm">
+                                              Contact Information
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent className="space-y-4">
+                                            <div className="space-y-3">
+                                              <div className="flex items-center justify-between w-full text-sm">
+                                                <div className="flex items-center min-w-0">
+                                                  <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                                                  <a
+                                                    href={`mailto:${prospect.email}`}
+                                                    className="text-blue-600 hover:underline truncate"
+                                                  >
+                                                    {prospect.email}
+                                                  </a>
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-shrink-0">
+                                                  <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                      <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                          handleCopy(
+                                                            prospect.email,
+                                                            "Email",
+                                                          )
+                                                        }
+                                                        aria-label="Copy email"
+                                                      >
+                                                        <Copy className="w-4 h-4" />
+                                                      </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      Copy
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                  <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                      <Button
+                                                        size="icon"
+                                                        onClick={() =>
+                                                          (window.location.href = `mailto:${prospect.email}`)
+                                                        }
+                                                        aria-label="Send email"
+                                                      >
+                                                        <Mail className="w-4 h-4" />
+                                                      </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      Email
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                </div>
+                                              </div>
+                                              {prospect.phone && (
                                                 <div className="flex items-center justify-between w-full text-sm">
                                                   <div className="flex items-center min-w-0">
-                                                    <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                                                    <Phone className="w-4 h-4 mr-2 text-gray-400" />
                                                     <a
-                                                      href={`mailto:${dummyProfile.email}`}
-                                                      className="text-blue-600 hover:underline truncate"
+                                                      href={`tel:${prospect.phone}`}
+                                                      className="hover:underline truncate"
                                                     >
-                                                      {maskEmail(
-                                                        dummyProfile.email,
-                                                      )}
+                                                      {prospect.phone}
                                                     </a>
                                                   </div>
                                                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -2072,11 +2083,11 @@ export default function ProspectResults() {
                                                           size="icon"
                                                           onClick={() =>
                                                             handleCopy(
-                                                              dummyProfile.email,
-                                                              "Email",
+                                                              prospect.phone,
+                                                              "Phone",
                                                             )
                                                           }
-                                                          aria-label="Copy email"
+                                                          aria-label="Copy phone"
                                                         >
                                                           <Copy className="w-4 h-4" />
                                                         </Button>
@@ -2089,384 +2100,253 @@ export default function ProspectResults() {
                                                       <TooltipTrigger asChild>
                                                         <Button
                                                           size="icon"
-                                                          onClick={() =>
-                                                            (window.location.href = `mailto:${dummyProfile.email}`)
-                                                          }
-                                                          aria-label="Send email"
+                                                          asChild
+                                                          aria-label="Call"
                                                         >
-                                                          <Mail className="w-4 h-4" />
+                                                          <a
+                                                            href={`tel:${prospect.phone}`}
+                                                          >
+                                                            <Phone className="w-4 h-4" />
+                                                          </a>
                                                         </Button>
                                                       </TooltipTrigger>
                                                       <TooltipContent>
-                                                        Email
+                                                        Call
                                                       </TooltipContent>
                                                     </Tooltip>
                                                   </div>
                                                 </div>
-                                                {true && (
-                                                  <div className="flex items-center justify-between w-full text-sm">
-                                                    <div className="flex items-center min-w-0">
-                                                      <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                                                      <a
-                                                        href={`tel:${selectedProspect.phone}`}
-                                                        className="hover:underline truncate"
-                                                      >
-                                                        {selectedProspect.phone}
-                                                      </a>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            onClick={() =>
-                                                              handleCopy(
-                                                                selectedProspect.phone,
-                                                                "Phone",
-                                                              )
-                                                            }
-                                                            aria-label="Copy phone"
-                                                          >
-                                                            <Copy className="w-4 h-4" />
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Copy
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            size="icon"
-                                                            asChild
-                                                            aria-label="Call"
-                                                          >
-                                                            <a
-                                                              href={`tel:${selectedProspect.phone}`}
-                                                            >
-                                                              <Phone className="w-4 h-4" />
-                                                            </a>
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Call
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                    </div>
+                                              )}
+                                              {prospect.linkedinUrl && (
+                                                <div className="flex items-center justify-between w-full text-sm">
+                                                  <div className="flex items-center min-w-0">
+                                                    <Linkedin className="w-4 h-4 mr-2 text-blue-600" />
+                                                    <a
+                                                      href={
+                                                        prospect.linkedinUrl
+                                                      }
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                      className="text-blue-600 hover:underline flex items-center truncate"
+                                                    >
+                                                      LinkedIn Profile
+                                                      <ExternalLink className="w-3 h-3 ml-1" />
+                                                    </a>
                                                   </div>
-                                                )}
-                                                {selectedProspect.linkedinUrl && (
-                                                  <div className="flex items-center justify-between w-full text-sm">
-                                                    <div className="flex items-center min-w-0">
-                                                      <Linkedin className="w-4 h-4 mr-2 text-blue-600" />
-                                                      <a
-                                                        href={
-                                                          "https://linkedin.com"
-                                                        }
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 hover:underline flex items-center truncate"
-                                                      >
-                                                        LinkedIn Profile
-                                                        <ExternalLink className="w-3 h-3 ml-1" />
-                                                      </a>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            variant="outline"
-                                                            size="icon"
-                                                            onClick={() =>
-                                                              handleCopy(
-                                                                "https://linkedin.com",
-                                                                "LinkedIn URL",
-                                                              )
+                                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                                    <Tooltip>
+                                                      <TooltipTrigger asChild>
+                                                        <Button
+                                                          variant="outline"
+                                                          size="icon"
+                                                          onClick={() =>
+                                                            handleCopy(
+                                                              prospect.linkedinUrl,
+                                                              "LinkedIn URL",
+                                                            )
+                                                          }
+                                                          aria-label="Copy LinkedIn URL"
+                                                        >
+                                                          <Copy className="w-4 h-4" />
+                                                        </Button>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        Copy
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                      <TooltipTrigger asChild>
+                                                        <Button
+                                                          size="icon"
+                                                          asChild
+                                                          aria-label="Open LinkedIn"
+                                                        >
+                                                          <a
+                                                            href={
+                                                              prospect.linkedinUrl
                                                             }
-                                                            aria-label="Copy LinkedIn URL"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
                                                           >
-                                                            <Copy className="w-4 h-4" />
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Copy
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            size="icon"
-                                                            asChild
-                                                            aria-label="Open LinkedIn"
-                                                          >
-                                                            <a
-                                                              href={
-                                                                "https://linkedin.com"
-                                                              }
-                                                              target="_blank"
-                                                              rel="noopener noreferrer"
-                                                            >
-                                                              <ExternalLink className="w-4 h-4" />
-                                                            </a>
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Open
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                    </div>
+                                                            <ExternalLink className="w-4 h-4" />
+                                                          </a>
+                                                        </Button>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        Open
+                                                      </TooltipContent>
+                                                    </Tooltip>
                                                   </div>
-                                                )}
-                                                <div className="flex items-center text-gray-700">
-                                                  <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <span>
-                                                    {
-                                                      dummyProfile.company
-                                                        .location
-                                                    }
-                                                  </span>
                                                 </div>
-                                                <div className="flex items-center text-gray-700">
-                                                  <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <span>
-                                                    {
-                                                      dummyProfile.company
-                                                        .domain
-                                                    }
-                                                  </span>
+                                              )}
+                                              <div className="flex items-center text-gray-700">
+                                                <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                                                <span>
+                                                  {prospect.city},{" "}
+                                                  {prospect.country}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+
+                                        <Card>
+                                          <CardHeader className="pb-3">
+                                            <CardTitle className="text-sm">
+                                              Professional Details
+                                            </CardTitle>
+                                          </CardHeader>
+                                          <CardContent className="space-y-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                              <div className="flex items-center p-3 border rounded-lg">
+                                                <div className="w-8 h-8 mr-3 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                                                  <Briefcase className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                  <div className="text-xs uppercase text-gray-500">
+                                                    Role
+                                                  </div>
+                                                  <div className="font-medium">
+                                                    {prospect.jobTitle}
+                                                  </div>
                                                 </div>
                                               </div>
-                                            </CardContent>
-                                          </Card>
-
-                                          <Card>
-                                            <CardHeader className="pb-3">
-                                              <CardTitle className="text-sm">
-                                                Professional Details
-                                              </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-4">
-                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div className="flex items-center p-3 border rounded-lg">
-                                                  <div className="w-8 h-8 mr-3 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
-                                                    <Briefcase className="w-4 h-4" />
+                                              <div className="flex items-center p-3 border rounded-lg">
+                                                <div className="w-8 h-8 mr-3 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                                  <Globe className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                  <div className="text-xs uppercase text-gray-500">
+                                                    Department
                                                   </div>
                                                   <div>
-                                                    <div className="text-xs uppercase text-gray-500">
-                                                      Role
-                                                    </div>
-                                                    <div className="font-medium">
-                                                      {
-                                                        selectedProspect.jobTitle
-                                                      }
-                                                    </div>
+                                                    {prospect.department ||
+                                                      "N/A"}
                                                   </div>
                                                 </div>
-                                                <div className="flex items-center p-3 border rounded-lg">
-                                                  <div className="w-8 h-8 mr-3 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                                                    <Globe className="w-4 h-4" />
+                                              </div>
+                                              <div className="flex items-center p-3 border rounded-lg">
+                                                <div className="w-8 h-8 mr-3 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                                                  <BadgeCheck className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                  <div className="text-xs uppercase text-gray-500">
+                                                    Level
+                                                  </div>
+                                                  <Badge variant="outline">
+                                                    {prospect.jobLevel}
+                                                  </Badge>
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center p-3 border rounded-lg">
+                                                <div className="w-8 h-8 mr-3 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                                  <Settings2 className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                  <div className="text-xs uppercase text-gray-500">
+                                                    Function
+                                                  </div>
+                                                  <Badge variant="outline">
+                                                    {prospect.jobFunction}
+                                                  </Badge>
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center p-3 border rounded-lg">
+                                                <div className="w-8 h-8 mr-3 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
+                                                  <Building className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                  <div className="text-xs uppercase text-gray-500">
+                                                    Company
                                                   </div>
                                                   <div>
+                                                    {prospect.companyName}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              {prospect.yearsAtCompany && (
+                                                <div className="flex items-center p-3 border rounded-lg">
+                                                  <div className="w-8 h-8 mr-3 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
+                                                    <Calendar className="w-4 h-4" />
+                                                  </div>
+                                                  <div className="w-full">
                                                     <div className="text-xs uppercase text-gray-500">
-                                                      Department
+                                                      Tenure
                                                     </div>
                                                     <div>
-                                                      {selectedProspect.department ||
-                                                        "N/A"}
+                                                      {prospect.yearsAtCompany}{" "}
+                                                      years at company
+                                                    </div>
+                                                    <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                      <div
+                                                        className="h-2 bg-valasys-orange"
+                                                        style={{
+                                                          width: `${Math.min(100, prospect.yearsAtCompany * 10)}%`,
+                                                        }}
+                                                      />
                                                     </div>
                                                   </div>
                                                 </div>
-                                                <div className="flex items-center p-3 border rounded-lg">
-                                                  <div className="w-8 h-8 mr-3 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                                                    <BadgeCheck className="w-4 h-4" />
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-xs uppercase text-gray-500">
-                                                      Level
-                                                    </div>
-                                                    <Badge variant="outline">
-                                                      {
-                                                        selectedProspect.jobLevel
-                                                      }
-                                                    </Badge>
-                                                  </div>
-                                                </div>
-                                                <div className="flex items-center p-3 border rounded-lg">
-                                                  <div className="w-8 h-8 mr-3 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
-                                                    <Settings2 className="w-4 h-4" />
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-xs uppercase text-gray-500">
-                                                      Function
-                                                    </div>
-                                                    <Badge variant="outline">
-                                                      {
-                                                        selectedProspect.jobFunction
-                                                      }
-                                                    </Badge>
-                                                  </div>
-                                                </div>
-                                                <div className="flex items-center p-3 border rounded-lg">
-                                                  <div className="w-8 h-8 mr-3 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
-                                                    <Building className="w-4 h-4" />
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-xs uppercase text-gray-500">
-                                                      Company
-                                                    </div>
-                                                    <div>
-                                                      {
-                                                        selectedProspect.companyName
-                                                      }
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                                {selectedProspect.yearsAtCompany && (
-                                                  <div className="flex items-center p-3 border rounded-lg">
-                                                    <div className="w-8 h-8 mr-3 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center">
-                                                      <Calendar className="w-4 h-4" />
-                                                    </div>
-                                                    <div className="w-full">
-                                                      <div className="text-xs uppercase text-gray-500">
-                                                        Tenure
-                                                      </div>
-                                                      <div>
-                                                        {
-                                                          selectedProspect.yearsAtCompany
-                                                        }{" "}
-                                                        years at company
-                                                      </div>
-                                                      <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div
-                                                          className="h-2 bg-valasys-orange"
-                                                          style={{
-                                                            width: `${Math.min(100, selectedProspect.yearsAtCompany * 10)}%`,
-                                                          }}
-                                                        />
-                                                      </div>
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </CardContent>
-                                          </Card>
+                                              )}
+                                            </div>
+                                          </CardContent>
+                                        </Card>
 
-                                          {/* Company Information */}
-                                          <Card>
-                                            <CardHeader className="pb-3">
-                                              <div className="flex items-center justify-between">
-                                                <CardTitle className="text-sm flex items-center gap-2">
-                                                  <Building className="w-4 h-4" />{" "}
-                                                  Company
-                                                </CardTitle>
-                                              </div>
-                                            </CardHeader>
-                                            <CardContent className="space-y-3">
-                                              <div className="text-sm text-gray-700">
-                                                {dummyProfile.company.name} is
-                                                guided by customer obsession and
-                                                innovation.
-                                              </div>
-                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                  <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <span>
-                                                    {
-                                                      dummyProfile.company
-                                                        .location
-                                                    }
-                                                  </span>
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                  <Globe className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <a
-                                                    href={`https://${dummyProfile.company.domain}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:underline"
-                                                  >
-                                                    View company page
-                                                  </a>
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                  <BarChart3 className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <span>
-                                                    {
-                                                      dummyProfile.company
-                                                        .revenue
-                                                    }{" "}
-                                                    in revenue
-                                                  </span>
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-700">
-                                                  <Users className="w-4 h-4 mr-2 text-gray-400" />
-                                                  <span>
-                                                    {
-                                                      dummyProfile.company
-                                                        .headcount
-                                                    }
-                                                  </span>
-                                                </div>
-                                              </div>
-                                            </CardContent>
-                                          </Card>
-
-                                          {/* Specialties & Technologies */}
-                                          <Card>
-                                            <CardHeader className="pb-3">
-                                              <CardTitle className="text-sm">
-                                                Specialties
+                                        <Card>
+                                          <CardHeader className="pb-3">
+                                            <div className="flex items-center justify-between">
+                                              <CardTitle className="text-sm flex items-center gap-2">
+                                                <Building className="w-4 h-4" />{" "}
+                                                Company
                                               </CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                              <div className="flex flex-wrap gap-2">
-                                                {dummyProfile.specialties.map(
-                                                  (tag) => (
-                                                    <span
-                                                      key={tag}
-                                                      className="px-2 py-1 rounded-md border text-xs bg-gray-50"
-                                                    >
-                                                      {tag}
-                                                    </span>
-                                                  ),
-                                                )}
+                                            </div>
+                                          </CardHeader>
+                                          <CardContent className="space-y-3">
+                                            <div className="text-sm text-gray-700">
+                                              {prospect.companyName} is a
+                                              prominent organization in the{" "}
+                                              {prospect.industry} sector.
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                              <div className="flex items-center text-sm text-gray-700">
+                                                <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                                                <span>
+                                                  {prospect.city},{" "}
+                                                  {prospect.country}
+                                                </span>
                                               </div>
-                                            </CardContent>
-                                          </Card>
-
-                                          <Card>
-                                            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                                              <CardTitle className="text-sm">
-                                                Technologies
-                                              </CardTitle>
-                                              <a
-                                                href="#"
-                                                className="text-xs text-blue-600 hover:underline"
-                                              >
-                                                more technologies
-                                              </a>
-                                            </CardHeader>
-                                            <CardContent>
-                                              <div className="flex flex-wrap gap-2">
-                                                {dummyProfile.technologies.map(
-                                                  (tech) => (
-                                                    <span
-                                                      key={tech}
-                                                      className="px-2 py-1 rounded-md border text-xs bg-gray-50"
-                                                    >
-                                                      {tech}
-                                                    </span>
-                                                  ),
-                                                )}
+                                              <div className="flex items-center text-sm text-gray-700">
+                                                <Globe className="w-4 h-4 mr-2 text-gray-400" />
+                                                <a
+                                                  href={`https://${prospect.companyDomain}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:underline"
+                                                >
+                                                  View company page
+                                                </a>
                                               </div>
-                                            </CardContent>
-                                          </Card>
-                                        </div>
+                                              <div className="flex items-center text-sm text-gray-700">
+                                                <BarChart3 className="w-4 h-4 mr-2 text-gray-400" />
+                                                <span>
+                                                  {prospect.revenue} in revenue
+                                                </span>
+                                              </div>
+                                              <div className="flex items-center text-sm text-gray-700">
+                                                <Users className="w-4 h-4 mr-2 text-gray-400" />
+                                                <span>
+                                                  {sizeToHeadcount(
+                                                    prospect.companySize,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </CardContent>
+                                        </Card>
                                       </div>
-                                    )}
-                                  </SheetContent>
-                                </Sheet>
+                                    </SheetContent>
+                                  </Sheet>
+                                </div>
                               </TableCell>
                             )}
                           </TableRow>

@@ -1,7 +1,8 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Link } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 
@@ -21,7 +22,9 @@ export default function NotFound() {
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center justify-center p-8 text-center">
             <AlertTriangle className="w-16 h-16 text-valasys-orange mb-4" />
-            <h1 className="text-6xl font-bold text-valasys-gray-900 mb-2">404</h1>
+            <h1 className="text-6xl font-bold text-valasys-gray-900 mb-2">
+              404
+            </h1>
             <p className="text-xl text-valasys-gray-600 mb-2">Page not found</p>
             <p className="text-valasys-gray-500 mb-6">
               The page you're looking for doesn't exist.
