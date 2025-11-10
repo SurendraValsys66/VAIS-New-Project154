@@ -338,6 +338,7 @@ export default function BuildVAISForm() {
     geolocation: [],
     intentTopics: [],
   });
+  const [validationState, setValidationState] = useState({ step1: false, step2: false, step3: false });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [geoSearchTerm, setGeoSearchTerm] = useState("");
