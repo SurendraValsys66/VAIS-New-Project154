@@ -46,6 +46,16 @@ export default function CreateAccount() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!agreementAcknowledged) {
+      setAgreementModalOpen(true);
+      return;
+    }
+
+    if (!termsChecked) {
+      return;
+    }
+
     setIsLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setIsLoading(false);
@@ -54,6 +64,10 @@ export default function CreateAccount() {
       email = localStorage.getItem("signupEmail") || "";
     } catch (e) {}
     navigate("/email-verification", { state: { email } });
+  };
+
+  const handleAgreementAcknowledge = () => {
+    setAgreementAcknowledged(true);
   };
 
   const aiElements = [
