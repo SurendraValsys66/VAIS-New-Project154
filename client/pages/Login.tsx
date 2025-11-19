@@ -667,6 +667,22 @@ export default function Login() {
               </p>
             </div>
 
+            {/* Customer Testimonials Section */}
+            <div
+              className={`transform transition-all duration-700 ease-out ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+              style={{ transitionDelay: "150ms" }}
+            >
+              {/* Section Title */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-valasys-gray-900">
+                  What Our Customers Say
+                </h3>
+                <p className="text-xs text-valasys-gray-600 mt-1">
+                  Trusted by leading sales teams
+                </p>
+              </div>
+            </div>
+
             {/* Customer Testimonials Carousel */}
             <div
               className={`transform transition-all duration-700 ease-out ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
