@@ -45,19 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DateRangePicker as RsuiteDateRangePicker } from "rsuite";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+import { AddPaymentMethodDialog, type PaymentMethod } from "@/components/billing/AddPaymentMethodDialog";
 
 interface PaymentRow {
   id: string;
