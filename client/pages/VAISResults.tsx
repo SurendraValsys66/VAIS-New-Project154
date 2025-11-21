@@ -890,7 +890,14 @@ export default function VAISResults() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center space-x-4">
                   <CardTitle className="text-lg">Company Results</CardTitle>
-                  <Badge variant="secondary" className="bg-gray-100">
+                  <Badge variant="secondary" className="bg-gray-100 flex items-center gap-2">
+                    <Checkbox
+                      checked={
+                        selectedItems.length === paginatedData.length &&
+                        paginatedData.length > 0
+                      }
+                      onCheckedChange={handleSelectAll}
+                    />
                     {selectedItems.length} Items Selected
                   </Badge>
                 </div>
