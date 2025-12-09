@@ -2,7 +2,6 @@ import React from "react";
 import { Wrench, Mail } from "lucide-react";
 
 export default function Maintenance() {
-
   return (
     <div className="min-h-screen w-full bg-[radial-gradient(ellipse_at_top_left,rgba(255,106,0,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(26,115,232,0.12),transparent_50%),radial-gradient(ellipse_at_top_right,rgba(0,196,140,0.12),transparent_40%)] overflow-hidden flex items-center justify-center relative bg-white">
       {/* Animated Background Elements */}
@@ -29,7 +28,10 @@ export default function Maintenance() {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-valasys-orange to-valasys-blue rounded-full blur-2xl opacity-30"></div>
             <div className="relative bg-gradient-to-br from-valasys-orange to-valasys-blue p-6 rounded-full">
-              <Wrench className="w-12 h-12 text-white animate-spin" style={{animationDuration: '3s'}} />
+              <Wrench
+                className="w-12 h-12 text-white animate-spin"
+                style={{ animationDuration: "3s" }}
+              />
             </div>
           </div>
         </div>
@@ -63,7 +65,9 @@ export default function Maintenance() {
                 <Wrench className="w-5 h-5 text-valasys-orange mt-1" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-valasys-gray-900 mb-1">Improvements</h3>
+                <h3 className="font-semibold text-valasys-gray-900 mb-1">
+                  Improvements
+                </h3>
                 <p className="text-sm text-valasys-gray-600">
                   We're implementing new features and optimizing performance
                 </p>
@@ -78,7 +82,9 @@ export default function Maintenance() {
                 <Mail className="w-5 h-5 text-valasys-blue mt-1" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-valasys-gray-900 mb-1">Stay Updated</h3>
+                <h3 className="font-semibold text-valasys-gray-900 mb-1">
+                  Stay Updated
+                </h3>
                 <p className="text-sm text-valasys-gray-600">
                   Subscribe to receive updates when we're back online
                 </p>
@@ -89,7 +95,10 @@ export default function Maintenance() {
 
         {/* Email Subscription */}
         <div className="bg-gradient-to-r from-valasys-orange/5 to-valasys-blue/5 backdrop-blur-lg border border-valasys-gray-200 rounded-xl p-6 mb-8 shadow-md">
-          <form className="flex flex-col sm:flex-row gap-3" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="flex flex-col sm:flex-row gap-3"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <input
               type="email"
               placeholder="Enter your email"
@@ -128,9 +137,9 @@ export default function Maintenance() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(15)].map((_, i) => {
           const colors = [
-            'bg-valasys-orange',
-            'bg-valasys-blue',
-            'bg-valasys-green'
+            "bg-valasys-orange",
+            "bg-valasys-blue",
+            "bg-valasys-green",
           ];
           const color = colors[i % colors.length];
           return (
