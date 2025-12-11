@@ -55,6 +55,7 @@ import {
 import { cn } from "@/lib/utils";
 import { FloatingStatsWidget } from "@/components/ui/floating-stats-widget";
 import { markStepCompleted } from "@/lib/masteryStorage";
+import { FeedbackModal } from "@/components/ui/feedback-modal";
 
 interface FormData {
   productSubcategory: string;
@@ -368,6 +369,7 @@ export default function BuildVAISForm() {
   ]);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [newSearchName, setNewSearchName] = useState("");
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredTopics = intentTopics.filter(
@@ -1483,6 +1485,14 @@ export default function BuildVAISForm() {
                   )}
                 </Tooltip>
 
+                <Button
+                  onClick={() => setShowFeedbackModal(true)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Feedback
+                </Button>
+
                 <div className="text-center text-xs text-valasys-gray-500">
                   <div className="font-bold mb-1">
                     0/2000 Utilized Per Day Download
@@ -1543,6 +1553,12 @@ export default function BuildVAISForm() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          open={showFeedbackModal}
+          onOpenChange={setShowFeedbackModal}
+        />
       </div>
     </TooltipProvider>
   );
