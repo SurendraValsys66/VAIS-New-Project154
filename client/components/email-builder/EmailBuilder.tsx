@@ -35,7 +35,7 @@ import {
   Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EmailCanvas } from "./EmailCanvas";
+import { useDrop } from "react-dnd";
 
 interface EmailBuilderProps {
   templateId?: string;
