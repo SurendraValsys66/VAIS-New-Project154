@@ -98,7 +98,14 @@ export function createVideoBlock(src = ""): VideoBlock {
     thumbnail: "",
     width: 300,
     height: 200,
+    widthUnit: "px",
     alignment: "center",
+    padding: 0,
+    margin: 0,
+    borderWidth: 0,
+    borderColor: "#000000",
+    borderRadius: 0,
+    visibility: "all",
   };
 }
 
