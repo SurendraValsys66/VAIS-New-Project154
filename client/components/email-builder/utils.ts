@@ -18,14 +18,17 @@ import {
   SpacerBlock,
 } from "./types";
 
-let idCounter = 0;
 export function generateId(): string {
+  // Use crypto.randomUUID if available, fallback to timestamp + random
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp + multiple random components for better uniqueness
   const timestamp = Date.now();
-  const counter = idCounter++ % 10000;
-  const random =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${counter}-${random}`;
+  const random1 = Math.random().toString(36).substring(2, 15);
+  const random2 = Math.random().toString(36).substring(2, 15);
+  const random3 = Math.random().toString(36).substring(2, 15);
+  return `${timestamp}-${random1}-${random2}-${random3}`;
 }
 
 export function createTitleBlock(content = "Click to edit title"): TitleBlock {
