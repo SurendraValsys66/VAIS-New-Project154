@@ -14,6 +14,7 @@ import { ProductBlockComponent } from "./blocks/ProductBlockComponent";
 import { NavigationBlockComponent } from "./blocks/NavigationBlockComponent";
 import { HeaderBlockComponent } from "./blocks/HeaderBlockComponent";
 import { FooterBlockComponent } from "./blocks/FooterBlockComponent";
+import { FooterWithSocialBlockComponent } from "./blocks/FooterWithSocialBlockComponent";
 import { SpacerBlockComponent } from "./blocks/SpacerBlockComponent";
 import { CenteredImageCardBlockComponent } from "./blocks/CenteredImageCardBlockComponent";
 import { SplitImageCardBlockComponent } from "./blocks/SplitImageCardBlockComponent";
