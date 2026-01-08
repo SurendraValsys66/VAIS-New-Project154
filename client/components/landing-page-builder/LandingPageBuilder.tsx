@@ -129,30 +129,21 @@ export const LandingPageBuilder: React.FC<LandingPageBuilderProps> = ({
     });
   };
 
-  const handleSelectTemplate = (templateId: string) => {
-    // Map template IDs to actual blocks
-    const templateBlockMap: Record<string, () => LandingPageBlock> = {
-      "template-1": createHeroBlock,
-      "template-2": createHeroBlock,
-      "template-3": createFeaturesBlock,
-      "template-4": createAboutBlock,
-      "template-5": createAboutBlock,
-      "template-6": createFeaturesBlock,
-      "template-7": createFeaturesBlock,
-      "template-8": createHeaderBlock,
-      "template-9": createTestimonialsBlock,
-      "template-pricing": createPricingBlock,
-      "template-faq": createFaqBlock,
-      "template-signup": createSignupBlock,
-      "template-footer": createPricingFooterBlock,
-    };
+  const handleSelectTemplate = (blocks: LandingPageBlock[]) => {
+    if (!page) return;
 
-    const blockCreator = templateBlockMap[templateId];
-    if (blockCreator && page) {
-      const newBlock = blockCreator();
-      handleAddBlock(newBlock);
-      setIsSectionsPanelOpen(false);
-    }
+    // Add all blocks from the template to the page
+    blocks.forEach((block) => {
+      setPage((prevPage) => {
+        if (!prevPage) return prevPage;
+        return {
+          ...prevPage,
+          blocks: [...prevPage.blocks, block],
+        };
+      });
+    });
+
+    setIsSectionsPanelOpen(false);
   };
 
   const handleSave = async () => {
