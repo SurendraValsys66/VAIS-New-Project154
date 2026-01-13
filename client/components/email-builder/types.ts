@@ -462,7 +462,8 @@ export type ContentBlock =
   | CenteredImageCardBlock
   | SplitImageCardBlock
   | TwoColumnCardBlock
-  | StatsBlock;
+  | StatsBlock
+  | FeaturesBlock;
 
 export interface EmailTemplate {
   id: string;
