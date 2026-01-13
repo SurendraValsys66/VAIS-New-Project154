@@ -704,8 +704,24 @@ export function renderBlockToHTML(block: ContentBlock): string {
             : "block; margin: auto;";
       return `<img src="${imageBlock.src}" alt="${imageBlock.alt}" style="width: ${imageWidth}; height: ${imageHeight}; display: ${imageDisplay} padding: ${imageBlock.padding}px; margin: ${imageBlock.margin}px; border-radius: ${imageBlock.borderRadius}px; ${imageBorder}" />`;
     }
-    case "video":
-      return `<div style="text-align: ${block.alignment};"><video width="${block.width}" height="${block.height}" controls poster="${block.thumbnail}" style="max-width: 100%;"><source src="${block.src}" type="video/mp4"></video></div>`;
+    case "video": {
+      const videoBlock = block as VideoBlock;
+      const videoWidth =
+        videoBlock.widthUnit === "%"
+          ? `${videoBlock.width}%`
+          : `${videoBlock.width}px`;
+      const videoBorder =
+        videoBlock.borderWidth > 0
+          ? `border: ${videoBlock.borderWidth}px solid ${videoBlock.borderColor};`
+          : "";
+      const videoDisplay =
+        videoBlock.alignment === "left"
+          ? "block; margin-right: auto;"
+          : videoBlock.alignment === "right"
+            ? "block; margin-left: auto;"
+            : "block; margin: auto;";
+      return `<div style="width: ${videoWidth}; padding: ${videoBlock.padding}px; margin: ${videoBlock.margin}px; display: ${videoDisplay}"><video width="100%" height="${videoBlock.height}" controls poster="${videoBlock.thumbnail}" style="max-width: 100%; height: auto; border-radius: ${videoBlock.borderRadius}px; display: block; ${videoBorder}"><source src="${videoBlock.src}" type="video/mp4"></video></div>`;
+    }
     case "button": {
       const buttonBlock = block as ButtonBlock;
       const buttonWidth =
