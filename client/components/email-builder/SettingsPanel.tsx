@@ -3247,7 +3247,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </Label>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="videoSrc" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="videoSrc"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Video URL
                   </Label>
                   <Input
@@ -3261,7 +3264,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="videoThumb" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="videoThumb"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Thumbnail URL
                   </Label>
                   <Input
@@ -3584,10 +3590,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                           min="0"
                           value={marginLeft}
                           onChange={(e) =>
-                            handleMarginChange(
-                              parseInt(e.target.value),
-                              "left",
-                            )
+                            handleMarginChange(parseInt(e.target.value), "left")
                           }
                           className="flex-1 focus:ring-valasys-orange focus:ring-2"
                         />
@@ -4454,7 +4457,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <h4 className="text-xs font-bold text-gray-900 mb-3">Content</h4>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="prodImage" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodImage"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Product Image URL
                   </Label>
                   <Input
@@ -4468,7 +4474,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prodTitle" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodTitle"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Product Title
                   </Label>
                   <Input
@@ -4481,7 +4490,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prodDesc" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodDesc"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Description
                   </Label>
                   <textarea
@@ -4495,7 +4507,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prodPrice" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodPrice"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Price
                   </Label>
                   <Input
@@ -4508,7 +4523,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prodBtnText" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodBtnText"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Button Text
                   </Label>
                   <Input
@@ -4521,7 +4539,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prodBtnLink" className="text-xs text-gray-700 mb-1 block">
+                  <Label
+                    htmlFor="prodBtnLink"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
                     Button Link
                   </Label>
                   <Input
@@ -4832,10 +4853,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                           min="0"
                           value={marginLeft}
                           onChange={(e) =>
-                            handleMarginChange(
-                              parseInt(e.target.value),
-                              "left",
-                            )
+                            handleMarginChange(parseInt(e.target.value), "left")
                           }
                           className="flex-1 focus:ring-valasys-orange focus:ring-2"
                         />

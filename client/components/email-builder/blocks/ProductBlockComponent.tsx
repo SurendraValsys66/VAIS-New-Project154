@@ -110,7 +110,12 @@ export const ProductBlockComponent: React.FC<ProductBlockComponentProps> = ({
         <div
           style={{
             display: "flex",
-            justifyContent: block.alignment === "center" ? "center" : block.alignment === "right" ? "flex-end" : "flex-start",
+            justifyContent:
+              block.alignment === "center"
+                ? "center"
+                : block.alignment === "right"
+                  ? "flex-end"
+                  : "flex-start",
           }}
         >
           <a
