@@ -27,6 +27,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [groupMarginSides, setGroupMarginSides] = useState(false);
   const [applyBorderToAllSides, setApplyBorderToAllSides] = useState(true);
   const [linkType, setLinkType] = useState("url");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const paddingValue =
     "padding" in (block || {}) ? ((block as any).padding ?? 0) : 0;
   const marginValue =
@@ -39,6 +40,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [marginRight, setMarginRight] = useState(marginValue);
   const [marginBottom, setMarginBottom] = useState(marginValue);
   const [marginLeft, setMarginLeft] = useState(marginValue);
+
+  // Initialize selectedCardId when block changes to twoColumnCard
+  React.useEffect(() => {
+    if (block?.type === "twoColumnCard") {
+      const twoColBlock = block as any;
+      setSelectedCardId(twoColBlock.cards?.[0]?.id || null);
+    }
+  }, [block?.id, block?.type]);
 
   if (!block) {
     return (
