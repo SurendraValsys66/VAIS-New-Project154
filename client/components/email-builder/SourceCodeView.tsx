@@ -67,30 +67,41 @@ export const SourceCodeView: React.FC<SourceCodeViewProps> = ({ template }) => {
   }, [htmlContent]);
 
   const handleDownloadInlineHTML = () => {
-    // Create pure HTML with inline CSS
-    const inlineHTMLContent = `<!DOCTYPE html>
+    try {
+      // Create pure HTML with inline CSS
+      const bgColor = template.backgroundColor || "#ffffff";
+      const padding = template.padding || 0;
+
+      const inlineHTMLContent = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${template.subject}</title>
+  <title>${template.subject || "Email Template"}</title>
 </head>
-<body style="background-color: ${template.backgroundColor || "#ffffff"}; padding: ${template.padding || 0}px; font-family: Arial, sans-serif; margin: 0;">
+<body style="background-color: ${bgColor}; padding: ${padding}px; font-family: Arial, sans-serif; margin: 0;">
   <div style="max-width: 600px; margin: 0 auto;">
-${htmlContent.substring(htmlContent.indexOf('<div style="max-width:'), htmlContent.lastIndexOf("</div>") + 6)}
+    ${htmlContent || "<p>Empty template</p>"}
   </div>
 </body>
 </html>`;
 
-    const element = document.createElement("a");
-    const file = new Blob([inlineHTMLContent], { type: "text/html" });
-    element.href = URL.createObjectURL(file);
-    element.download = `${template.name || "template"}.html`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+      const element = document.createElement("a");
+      const file = new Blob([inlineHTMLContent], { type: "text/html" });
+      element.href = URL.createObjectURL(file);
+      element.download = `${template.name || "template"}.html`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
 
-    toast.success("Pure HTML with inline CSS downloaded successfully");
+      // Clean up the object URL
+      setTimeout(() => URL.revokeObjectURL(element.href), 100);
+
+      toast.success("Pure HTML downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading HTML:", error);
+      toast.error("Failed to download HTML");
+    }
   };
 
 
