@@ -80,17 +80,6 @@ export const SourceCodeView: React.FC<SourceCodeViewProps> = ({ template }) => {
     copyToClipboard();
   }, [htmlContent]);
 
-  const handleDownloadHTML = () => {
-    const element = document.createElement("a");
-    const file = new Blob([htmlContent], { type: "text/html" });
-    element.href = URL.createObjectURL(file);
-    element.download = `${template.name || "template"}.html`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-
-    toast.success("HTML downloaded successfully");
-  };
 
   const handleDownloadInlineHTML = () => {
     // Create pure HTML with inline CSS
