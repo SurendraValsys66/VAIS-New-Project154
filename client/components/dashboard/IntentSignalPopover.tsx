@@ -137,49 +137,49 @@ export default function IntentSignalPopover({
           )}
         >
           {/* Header with Gradient */}
-          <div className="bg-gradient-to-r from-valasys-orange to-orange-500 text-white sticky top-0 z-10">
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                    <Building2 className="w-6 h-6 text-white" />
+          <div className="bg-gradient-to-r from-valasys-orange to-orange-500 text-white sticky top-0 z-10 border-b border-orange-600">
+            <div className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-1">
-                      <h2 className="text-xl font-bold">{data.companyName}</h2>
-                      <Badge
-                        className={cn(
-                          "text-xs px-2 py-1 font-medium",
-                          getIntentSignalColor(data.intentSignal),
-                        )}
-                      >
-                        {data.intentSignal}
-                      </Badge>
-                    </div>
-                    <p className="text-xs opacity-90">Intent Signal Analysis</p>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-bold truncate">{data.companyName}</h2>
+                    <p className="text-xs opacity-85">Intent Signal Analysis</p>
                   </div>
                 </div>
-                <button
-                  onClick={closePanelClick}
-                  className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
-                >
-                  <X className="w-4 h-4 text-white" />
-                </button>
+                <div className="ml-3 flex items-center space-x-2 flex-shrink-0">
+                  <Badge
+                    className={cn(
+                      "text-xs px-2 py-1 font-medium whitespace-nowrap",
+                      getIntentSignalColor(data.intentSignal),
+                    )}
+                  >
+                    {data.intentSignal}
+                  </Badge>
+                  <button
+                    onClick={closePanelClick}
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm flex-shrink-0"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
               </div>
 
               {/* Quick Stats in Header */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <div className="text-xs opacity-90 mb-1">VAIS Score</div>
-                  <div className="text-lg font-bold">{data.vais}%</div>
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
+                  <div className="text-xs opacity-85 mb-0.5">VAIS</div>
+                  <div className="text-sm font-bold">{data.vais}%</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <div className="text-xs opacity-90 mb-1">Revenue</div>
-                  <div className="text-sm font-semibold truncate">{data.revenue}</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
+                  <div className="text-xs opacity-85 mb-0.5">Revenue</div>
+                  <div className="text-xs font-semibold truncate">{data.revenue}</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <div className="text-xs opacity-90 mb-1">Location</div>
-                  <div className="text-sm font-semibold">{data.city}</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
+                  <div className="text-xs opacity-85 mb-0.5">Location</div>
+                  <div className="text-xs font-semibold truncate">{data.city}</div>
                 </div>
               </div>
             </div>
