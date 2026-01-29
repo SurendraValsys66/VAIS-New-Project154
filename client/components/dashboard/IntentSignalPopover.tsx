@@ -199,67 +199,69 @@ export default function IntentSignalPopover({
                   onClick={handleChartClick}
                   style={{ height: "280px" }}
                 >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={chartData}
-                      margin={{
-                        top: 10,
-                        right: 30,
-                        left: 0,
-                        bottom: 10,
-                      }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="opacity-20"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="week"
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tick={{ fill: "#999" }}
-                      />
-                      <YAxis
-                        fontSize={11}
-                        tickLine={false}
-                        axisLine={false}
-                        tick={{ fill: "#999" }}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line
-                        type="monotone"
-                        dataKey="compositeScore"
-                        stroke={chartConfig.compositeScore.color}
-                        strokeWidth={2.5}
-                        dot={{
-                          fill: chartConfig.compositeScore.color,
-                          strokeWidth: 2,
-                          r: 4,
+                  <ChartContainer config={chartConfig} className="w-full h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={chartData}
+                        margin={{
+                          top: 10,
+                          right: 30,
+                          left: 0,
+                          bottom: 10,
                         }}
-                        activeDot={{
-                          r: 6,
-                        }}
-                        isAnimationActive={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="deltaScore"
-                        stroke={chartConfig.deltaScore.color}
-                        strokeWidth={2.5}
-                        dot={{
-                          fill: chartConfig.deltaScore.color,
-                          strokeWidth: 2,
-                          r: 4,
-                        }}
-                        activeDot={{
-                          r: 6,
-                        }}
-                        isAnimationActive={true}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          className="opacity-20"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="week"
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "#999" }}
+                        />
+                        <YAxis
+                          fontSize={11}
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fill: "#999" }}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line
+                          type="monotone"
+                          dataKey="compositeScore"
+                          stroke={chartConfig.compositeScore.color}
+                          strokeWidth={2.5}
+                          dot={{
+                            fill: chartConfig.compositeScore.color,
+                            strokeWidth: 2,
+                            r: 4,
+                          }}
+                          activeDot={{
+                            r: 6,
+                          }}
+                          isAnimationActive={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="deltaScore"
+                          stroke={chartConfig.deltaScore.color}
+                          strokeWidth={2.5}
+                          dot={{
+                            fill: chartConfig.deltaScore.color,
+                            strokeWidth: 2,
+                            r: 4,
+                          }}
+                          activeDot={{
+                            r: 6,
+                          }}
+                          isAnimationActive={true}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center hover:text-valasys-orange transition-colors cursor-pointer">
                   Click to view full breakdown →
