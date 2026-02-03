@@ -181,10 +181,8 @@ export default function IntentSignalPopover({
                   {itemId && onAddToList && (
                     <button
                       onClick={() => {
-                        if (!isAdded) {
-                          onAddToList(itemId, true);
-                          setIsAdded(true);
-                        }
+                        onAddToList(itemId, !isAdded);
+                        setIsAdded(!isAdded);
                       }}
                       className={cn(
                         "px-3 h-9 rounded-lg flex items-center justify-center gap-2 transition-all flex-shrink-0 text-xs font-medium whitespace-nowrap",
@@ -192,7 +190,7 @@ export default function IntentSignalPopover({
                           ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                           : "bg-slate-700 hover:bg-slate-600 text-slate-200"
                       )}
-                      title={isAdded ? "Added to download" : "Add to download"}
+                      title={isAdded ? "Remove from download" : "Add to download"}
                     >
                       {isAdded ? (
                         <>
