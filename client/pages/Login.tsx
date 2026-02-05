@@ -534,7 +534,7 @@ export default function Login() {
       </div>
 
       {/* Right Side - Video & Integrations */}
-      <div className="hidden lg:flex relative bg-gradient-to-br from-valasys-orange/5 via-white to-valasys-blue/5 overflow-hidden">
+      <div className="hidden lg:flex relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-32 -right-32 w-64 h-64 lg:w-96 lg:h-96 rounded-full bg-valasys-orange/10 blur-3xl"></div>
