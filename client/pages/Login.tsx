@@ -595,7 +595,7 @@ export default function Login() {
 
               </div>
 
-              <p className="text-xs lg:text-sm text-valasys-gray-600 mt-2 lg:mt-3 text-center">
+              <p className="text-xs text-valasys-gray-600 mt-1 lg:mt-1.5 text-center">
                 See how VAIS transforms your sales intelligence
               </p>
             </div>
