@@ -541,7 +541,7 @@ export default function Login() {
           <div className="absolute -bottom-32 -left-32 w-64 h-64 lg:w-96 lg:h-96 rounded-full bg-valasys-blue/10 blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 flex flex-col w-full h-full px-8 lg:px-12 py-8 lg:py-10">
+        <div className="relative z-10 flex flex-col w-full h-full px-6 lg:px-10 py-6 lg:py-8">
           {/* Header Section */}
           <div
             className={`mb-4 lg:mb-6 transform transition-all duration-700 ease-out ${mounted ? "translate-y-0 opacity-100" : "-translate-y-6 opacity-0"}`}
