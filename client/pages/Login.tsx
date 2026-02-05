@@ -588,8 +588,8 @@ export default function Login() {
 
                 {/* Play Icon Badge */}
                 <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <div className="p-2.5 lg:p-3 rounded-full bg-valasys-orange/90 backdrop-blur-sm group-hover:bg-valasys-orange transition-colors duration-300">
-                    <Play className="h-5 lg:h-6 w-5 lg:w-6 text-white" fill="currentColor" />
+                  <div className="p-2 lg:p-2.5 rounded-full bg-valasys-orange/90 backdrop-blur-sm group-hover:bg-valasys-orange transition-colors duration-300">
+                    <Play className="h-4 lg:h-5 w-4 lg:w-5 text-white" fill="currentColor" />
                   </div>
                 </div>
 
