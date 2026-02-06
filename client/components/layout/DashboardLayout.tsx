@@ -387,7 +387,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     try {
       localStorage.clear();
     } catch {}
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   return (
