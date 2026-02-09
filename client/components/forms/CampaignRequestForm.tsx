@@ -836,8 +836,111 @@ function DeliverablesDialog({
               </li>
             </ul>
           </div>
+
+          {/* Campaign Actions */}
+          {userHasFullPermission && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-orange-600" />
+                Campaign Decision
+              </h3>
+
+              {campaignStatus === "pending" && (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-700 mb-4">
+                    Do you want to proceed with this campaign?
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => setShowConfirmation(true)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Accept Campaign
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setCampaignStatus("declined")}
+                      variant="destructive"
+                      className="flex-1 font-medium"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Decline Campaign
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {campaignStatus === "accepted" && (
+                <div className="bg-green-50 border border-green-200 rounded p-4 flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-green-900">Campaign Accepted</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      Our team will contact you shortly with next steps.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {campaignStatus === "declined" && (
+                <div className="bg-red-50 border border-red-200 rounded p-4 flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-red-900">Campaign Declined</p>
+                    <p className="text-sm text-red-700 mt-1">
+                      This campaign has been marked as declined. You can start a new campaign request.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900">
+              Confirm Campaign Acceptance
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-blue-900">Thank you!</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  Our team will contact you shortly.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowConfirmation(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setCampaignStatus("accepted");
+                setShowConfirmation(false);
+              }}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            >
+              Confirm
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
