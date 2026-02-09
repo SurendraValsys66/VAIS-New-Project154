@@ -369,7 +369,10 @@ interface DeliverablesDialogProps {
   campaignName: string;
   employeeSize: string;
   revenue: string;
+  userHasFullPermission?: boolean;
 }
+
+type CampaignStatus = "pending" | "accepted" | "declined";
 
 function DeliverablesDialog({
   jobTitles,
@@ -379,8 +382,11 @@ function DeliverablesDialog({
   campaignName,
   employeeSize,
   revenue,
+  userHasFullPermission = true,
 }: DeliverablesDialogProps) {
   const [open, setOpen] = useState(false);
+  const [campaignStatus, setCampaignStatus] = useState<CampaignStatus>("pending");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Region mappings
   const regionMap: { [key: string]: string } = {
