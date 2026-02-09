@@ -726,10 +726,10 @@ function DeliverablesDialog({
                           Employee Size
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-gray-50">
-                          {geolocations[0] || "Geography 1"}
+                          {geolocations.length > 0 ? geolocations[0] : "Geography 1"}
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-gray-50">
-                          {geolocations[1] || "Geography 2"}
+                          {geolocations.length > 1 ? geolocations[1] : "Geography 2"}
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-emerald-50 font-bold">
                           Total
