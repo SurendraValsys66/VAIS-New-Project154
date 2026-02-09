@@ -869,30 +869,28 @@ function DeliverablesDialog({
           )}
 
           {/* Important Information */}
-          <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Info className="w-4 h-4 text-blue-600" />
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Info className="w-3 h-3 text-blue-600" />
               Important Information
             </h3>
-            <ul className="space-y-3">
-              <li className="flex gap-3 text-gray-700">
-                <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">
-                  These are estimated counts based on current database. Final
-                  numbers may vary slightly
+            <ul className="space-y-2">
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
+                  These are estimated counts based on current database. Final numbers may vary slightly
                 </span>
               </li>
-              <li className="flex gap-3 text-gray-700">
-                <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
                   You can export the deliverables in CSV, Excel, or JSON format
                 </span>
               </li>
-              <li className="flex gap-3 text-gray-700">
-                <ChevronRight className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">
-                  All deliverables include verified contact information and
-                  professional background
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
+                  All deliverables include verified contact information and professional background
                 </span>
               </li>
             </ul>
