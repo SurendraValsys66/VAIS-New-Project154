@@ -5,9 +5,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -23,7 +20,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Upload,
+  X,
+  Check,
+  ChevronsUpDown,
+  FileText,
+  Trash2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -37,14 +42,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Upload,
-  X,
-  Check,
-  ChevronsUpDown,
-  FileText,
-  Trash2,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Form validation schema
@@ -64,7 +61,7 @@ const campaignFormSchema = z.object({
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
 
-// Mock data for options
+// Mock data
 const jobTitleOptions = [
   "Software Engineer",
   "Product Manager",
@@ -287,8 +284,8 @@ function FileUpload({ onFileChange, file }: FileUploadProps) {
   return (
     <div
       className={cn(
-        "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
-        dragActive ? "border-primary bg-primary/5" : "border-gray-300",
+        "border-2 border-dashed rounded-lg p-8 text-center transition-colors bg-white",
+        dragActive ? "border-primary bg-primary/5" : "border-gray-200",
         "hover:border-primary hover:bg-primary/5",
       )}
       onDragEnter={handleDrag}
@@ -325,28 +322,19 @@ function FileUpload({ onFileChange, file }: FileUploadProps) {
       ) : (
         <div>
           <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 mb-1">
             Upload TAL File
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-xs text-gray-500 mb-4">
             .csv, .xlsx, .xls — max 3 MB
           </p>
           <label htmlFor="file-upload">
-            <Button type="button" variant="outline" asChild>
+            <Button type="button" variant="outline" asChild className="text-orange-500 border-orange-500">
               <span className="cursor-pointer">Choose File</span>
             </Button>
           </label>
         </div>
       )}
-    </div>
-  );
-}
-
-// Section number badge component
-function SectionBadge({ number }: { number: number }) {
-  return (
-    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-valasys-orange text-white font-semibold text-sm">
-      {number}
     </div>
   );
 }
@@ -371,7 +359,6 @@ export default function CampaignRequestForm() {
   const onSubmit = (data: CampaignFormData) => {
     console.log("Form submitted:", data);
     console.log("Uploaded file:", uploadedFile);
-    // Handle form submission here
   };
 
   const isFormValid = () => {
@@ -390,265 +377,290 @@ export default function CampaignRequestForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Main Content Grid */}
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Section 1: Campaign Details */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <SectionBadge number={1} />
-              <h3 className="text-base font-semibold text-valasys-gray-900">
-                Campaign Details
-              </h3>
-            </div>
-            <p className="text-sm text-valasys-gray-600 ml-11">
-              Campaign name, company size & revenue
-            </p>
-            
-            <div className="space-y-4 ml-11">
-              <FormField
-                control={form.control}
-                name="campaignName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Campaign Name *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter campaign name"
-                        {...field}
-                        className="h-10"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="employeeSize"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Employee Size *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Select employee size range" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {employeeSizeOptions.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="revenue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Revenue *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Select revenue range" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {revenueOptions.map((revenue) => (
-                          <SelectItem key={revenue} value={revenue}>
-                            {revenue}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Section 2: Target Criteria */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <SectionBadge number={2} />
-              <h3 className="text-base font-semibold text-valasys-gray-900">
-                Target Criteria
-              </h3>
-            </div>
-            <p className="text-sm text-valasys-gray-600 ml-11">
-              Select job titles, levels & locations
-            </p>
-
-            <div className="space-y-4 ml-11">
-              <FormField
-                control={form.control}
-                name="jobTitles"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Job Title *</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={jobTitleOptions}
-                        selected={field.value}
-                        onSelectedChange={field.onChange}
-                        placeholder="Select job titles"
-                        searchPlaceholder="Search job titles..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="jobFunctions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Job Function *</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={jobFunctionOptions}
-                        selected={field.value}
-                        onSelectedChange={field.onChange}
-                        placeholder="Select job functions"
-                        searchPlaceholder="Search job functions..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="jobLevels"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Job Level *</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={jobLevelOptions}
-                        selected={field.value}
-                        onSelectedChange={field.onChange}
-                        placeholder="Select job levels"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="geolocations"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Geolocation *</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={geolocationOptions}
-                        selected={field.value}
-                        onSelectedChange={field.onChange}
-                        placeholder="Select locations"
-                        searchPlaceholder="Search locations..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="industries"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm">Industry *</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={industryOptions}
-                        selected={field.value}
-                        onSelectedChange={field.onChange}
-                        placeholder="Select industries"
-                        searchPlaceholder="Search industries..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: File Upload */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <SectionBadge number={3} />
-            <h3 className="text-base font-semibold text-valasys-gray-900">
-              File Upload
-            </h3>
-          </div>
-          <p className="text-sm text-valasys-gray-600 ml-11">
-            Upload TAL File
-          </p>
-
-          <div className="ml-11">
-            <FileUpload onFileChange={setUploadedFile} file={uploadedFile} />
-          </div>
-        </div>
-
-        {/* Section 4: Submit Campaign */}
-        <div className="space-y-4 border-t border-valasys-gray-200 pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-valasys-orange text-white font-semibold text-sm">
-                ✓
+          {/* LEFT COLUMN */}
+          <div className="space-y-6">
+            {/* Section 1: Campaign Details */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  1
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Campaign Details
+                </h3>
               </div>
-              <h3 className="text-base font-semibold text-valasys-gray-900">
-                Submit Campaign
-              </h3>
+              <p className="text-xs text-gray-600 mb-4">
+                Campaign name, company size & revenue
+              </p>
+
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="campaignName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Campaign Name *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter campaign name"
+                          {...field}
+                          className="h-9 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="employeeSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Employee Size
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select employee size range" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {employeeSizeOptions.map((size) => (
+                            <SelectItem key={size} value={size}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="revenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Revenue
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select revenue range" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {revenueOptions.map((revenue) => (
+                            <SelectItem key={revenue} value={revenue}>
+                              {revenue}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="text-sm"
-            >
-              Clear Differences
-            </Button>
+
+            {/* Section 3: File Upload */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  3
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  File Upload
+                </h3>
+              </div>
+              <p className="text-xs text-gray-600 mb-4">
+                Upload TAL File
+              </p>
+
+              <FileUpload onFileChange={setUploadedFile} file={uploadedFile} />
+            </div>
           </div>
 
-          <p className="text-sm text-valasys-gray-600 ml-11">
-            Review and submit your campaign request
-          </p>
-
-          <div className="ml-11 space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                All required fields have been filled. Click the button below to submit your campaign request.
+          {/* RIGHT COLUMN */}
+          <div className="space-y-6">
+            {/* Section 2: Target Criteria */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  2
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Target Criteria
+                </h3>
+              </div>
+              <p className="text-xs text-gray-600 mb-4">
+                Select job titles, levels & locations
               </p>
+
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="jobTitles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Job Title
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={jobTitleOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select job titles"
+                            searchPlaceholder="Search..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="jobFunctions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Job Function *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={jobFunctionOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select job functions"
+                            searchPlaceholder="Search..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="jobLevels"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Job Level *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={jobLevelOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select levels"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="geolocations"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Geolocation *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={geolocationOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select locations"
+                            searchPlaceholder="Search..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="industries"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Industry
+                      </FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={industryOptions}
+                          selected={field.value}
+                          onSelectedChange={field.onChange}
+                          placeholder="Select industries"
+                          searchPlaceholder="Search..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            {/* Section 4: Submit Campaign */}
+            <div className="bg-gradient-to-b from-orange-50 to-orange-100 border-2 border-orange-300 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-sm font-semibold">
+                    4
+                  </span>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Submit Campaign
+                  </h3>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600"
+                >
+                  Clear Differences
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-700 mb-3">
+                Review and submit your campaign request
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                <p className="text-xs text-blue-800">
+                  All required fields have been filled. Click the button below to submit your campaign request.
+                </p>
+              </div>
+
               <Button
                 type="submit"
-                className="bg-valasys-orange hover:bg-valasys-orange/90 text-white flex-1 sm:flex-none"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium h-10"
                 disabled={!isFormValid()}
               >
                 Submit Campaign Request
