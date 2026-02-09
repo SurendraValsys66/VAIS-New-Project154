@@ -525,13 +525,13 @@ function DeliverablesDialog({
         Check Deliverables
       </Button>
 
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
-            Campaign Deliverables Summary
+            Deliverables Overview
           </DialogTitle>
-          <DialogDescription className="text-base">
-            {campaignName || "Your Campaign"} - Estimated Reach & Regional Distribution
+          <DialogDescription className="text-base mt-1">
+            {campaignName || "Your Campaign"} - Database Reach Analysis & Campaign Summary
           </DialogDescription>
         </DialogHeader>
 
