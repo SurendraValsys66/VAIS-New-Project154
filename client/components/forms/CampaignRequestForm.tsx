@@ -83,12 +83,6 @@ const campaignFormSchema = z.object({
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
 
-// Update the type to ensure employeeSize and revenue are arrays
-type CampaignFormDataWithArrays = Omit<CampaignFormData, 'employeeSize' | 'revenue'> & {
-  employeeSize: string[];
-  revenue: string[];
-};
-
 // Mock data
 const jobTitleOptions = [
   "Software Engineer",
