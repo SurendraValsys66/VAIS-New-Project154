@@ -52,6 +52,59 @@ export function AIEmailGeneratorModal({
   }>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Extract key details from product description
+  const extractProductDetails = (description: string) => {
+    // Extract product name (first few words)
+    const productNameMatch = description.match(/^([^.!?\n]+)/);
+    const productName = productNameMatch
+      ? productNameMatch[1].trim().substring(0, 50)
+      : "our product";
+
+    // Extract key features (sentences with "features", "benefits", "helps", "enables")
+    const features = description
+      .split(/[.!?]/)
+      .filter((sentence) => {
+        const lower = sentence.toLowerCase();
+        return (
+          lower.includes("feature") ||
+          lower.includes("benefit") ||
+          lower.includes("help") ||
+          lower.includes("enable") ||
+          lower.includes("improve") ||
+          lower.includes("reduce") ||
+          lower.includes("increase") ||
+          lower.includes("save")
+        );
+      })
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+      .slice(0, 3);
+
+    // Check if description mentions ROI, efficiency, cost
+    const mentionsROI =
+      description.toLowerCase().includes("roi") ||
+      description.toLowerCase().includes("return") ||
+      description.toLowerCase().includes("revenue");
+    const mentionsEfficiency =
+      description.toLowerCase().includes("efficient") ||
+      description.toLowerCase().includes("productivity") ||
+      description.toLowerCase().includes("faster") ||
+      description.toLowerCase().includes("streamline");
+    const mentionsCost =
+      description.toLowerCase().includes("cost") ||
+      description.toLowerCase().includes("price") ||
+      description.toLowerCase().includes("budget") ||
+      description.toLowerCase().includes("save");
+
+    return {
+      productName,
+      features,
+      mentionsROI,
+      mentionsEfficiency,
+      mentionsCost,
+    };
+  };
+
   // Generate 3 email modes
   const generateEmails = () => {
     if (!productDescription.trim()) {
@@ -67,92 +120,92 @@ export function AIEmailGeneratorModal({
       const primaryLevel = jobLevels[0] || "Manager";
       const primaryIndustry = industries[0] || "Your Industry";
 
+      const details = extractProductDetails(productDescription);
+
+      // Build feature list for emails
+      const featureList =
+        details.features.length > 0
+          ? details.features
+              .map((f) => `• ${f.trim()}`)
+              .join("\n")
+          : `• ${details.productName} streamlines ${primaryFunction}\n• Improves team productivity\n• Reduces manual work`;
+
+      const attachmentNote =
+        uploadedFiles.length > 0
+          ? `\n\nI've attached detailed information about how we deliver these benefits.`
+          : "";
+
       const emails: EmailMode[] = [
         {
           id: "professional",
           title: "Professional Mode",
           description: "Formal, business-focused approach",
-          subject: `Transforming ${primaryIndustry}: ${campaignName} Solution for ${primaryJobTitle}s`,
+          subject: `${details.productName} for ${primaryJobTitle}s - Strategic Opportunity`,
           body: `Dear ${primaryLevel},
 
-I hope this message finds you well. I'm reaching out because your expertise in ${primaryFunction} at a leading ${primaryIndustry} organization makes you an ideal prospect for our latest initiative.
+I hope this message finds you well. I'm reaching out because your role in ${primaryFunction} at a leading ${primaryIndustry} organization aligns perfectly with the solutions we've developed.
 
-At ${campaignName}, we have developed a comprehensive solution specifically designed to address the unique challenges faced by ${primaryJobTitle} professionals like yourself. Our platform has helped over 500+ organizations improve operational efficiency by 40% while reducing costs.
+We've created ${details.productName} specifically to address the operational challenges facing ${primaryJobTitle}s like yourself. Based on our research and implementation across leading ${primaryIndustry} organizations, we've consistently delivered:
 
-Key Benefits:
-• Industry-specific best practices tailored for ${primaryIndustry}
-• Seamless integration with existing workflows
-• Dedicated support from domain experts
-• Measurable ROI within 90 days
+${featureList}
 
-${uploadedFiles.length > 0 ? `I have attached relevant materials that demonstrate our proven approach in organizations similar to yours.` : ""}
+Our clients have experienced measurable improvements in efficiency, cost management, and team productivity. The implementation is straightforward, with dedicated support throughout the process.
 
-I would welcome the opportunity to discuss how we can help you achieve your strategic objectives for ${new Date().getFullYear()}.
+I'd welcome the opportunity to discuss how ${details.productName} could support your team's objectives for ${new Date().getFullYear()}.${attachmentNote}
 
 Best regards,
-[Your Name]
-${campaignName}`,
+[Your Name]`,
         },
         {
           id: "friendly",
           title: "Friendly Mode",
           description: "Conversational, approachable tone",
-          subject: `Quick thought - ${campaignName} for ${primaryJobTitle}s`,
-          body: `Hi there!
+          subject: `Quick thought on ${details.productName} for ${primaryJobTitle}s`,
+          body: `Hi ${primaryLevel},
 
-I came across your profile and thought of you immediately. Here's why – you work in ${primaryFunction} in ${primaryIndustry}, and that's exactly the kind of leader we're trying to help right now.
+I came across your profile and thought of you immediately. Here's why – you're a ${primaryJobTitle} managing ${primaryFunction} in ${primaryIndustry}, and I think you'd really appreciate what we've built.
 
-Here's the situation: most ${primaryJobTitle}s spend way too much time on repetitive tasks instead of doing the strategic work that actually moves the needle. It's frustrating, right?
+Most ${primaryJobTitle}s tell us they're stuck with the same pain points: too much manual work, not enough time for strategy, and tools that don't quite fit their needs. Sound familiar?
 
-That's where ${campaignName} comes in. We've built something that specifically tackles this problem. Our platform helps teams like yours:
+That's exactly why we created ${details.productName}. Here's what it actually does:
 
-✓ Save 10+ hours per week on manual work
-✓ Collaborate better across teams
-✓ Get real insights that actually matter
+${featureList}
 
-The best part? You can get started in minutes – no complicated setup or learning curve.
+The best part? It actually works the way you want it to. No complicated implementation, no learning curve. Just solid functionality that makes your job easier.
 
-${uploadedFiles.length > 0 ? `I've attached a quick overview showing how this works in practice.` : ""}
-
-Would you be open to a quick 15-minute chat next week? I promise it'll be worth your time.
+I'd love to grab 15 minutes with you to show how this could transform your workflow. Are you free next week?${attachmentNote}
 
 Cheers,
-[Your Name]
-${campaignName}`,
+[Your Name]`,
         },
         {
           id: "data-driven",
           title: "Data-Driven Mode",
           description: "Statistics and insights focused",
-          subject: `Data shows ${primaryJobTitle}s in ${primaryIndustry} are saving 40% with ${campaignName}`,
+          subject: `${details.productName}: How ${primaryIndustry} ${primaryJobTitle}s Are Gaining Competitive Advantage`,
           body: `Hello ${primaryLevel},
 
-According to recent industry research, ${primaryJobTitle}s in ${primaryIndustry} waste an average of 15 hours per week on manual ${primaryFunction} processes. That's over 750 hours annually per professional.
+Our recent analysis of ${primaryIndustry} organizations revealed a critical insight: ${primaryJobTitle}s who adopt modern solutions for ${primaryFunction} gain a measurable competitive advantage.
 
-The numbers tell an interesting story:
+Here's what the data shows:
 
-📊 Our research across 500+ ${primaryIndustry} organizations revealed:
-  • 40% reduction in operational costs
-  • 3x faster project delivery
-  • 85% improvement in team productivity
-  • 92% user adoption rate within 30 days
+${details.mentionsCost ? "💰 Cost Impact:" : "📊 Key Benefits:"}
+${featureList}
 
-These aren't theoretical benefits. They're what ${campaignName} clients are experiencing right now.
+Our analysis across 100+ ${primaryIndustry} organizations implementing ${details.productName} found:
+  • 35-45% reduction in manual work hours
+  • 60% faster project completion times
+  • 80%+ user adoption within the first month
+  • 3:1 ROI within the first year
 
-Why the difference? Our platform is built specifically for ${primaryJobTitle}s who need to:
-  1. Eliminate repetitive tasks in ${primaryFunction}
-  2. Improve decision-making with real-time data
-  3. Scale operations without adding headcount
+What's driving these results? ${details.productName} was purpose-built for ${primaryJobTitle}s in ${primaryIndustry}. It eliminates friction and enables strategic focus.
 
-${uploadedFiles.length > 0 ? `I've attached case studies showing exactly how similar organizations in your space achieved these results.` : ""}
+The organizations pulling ahead aren't waiting – they're implementing solutions like ${details.productName} now. Would you be interested in seeing how this applies to your specific situation?${attachmentNote}
 
-The evidence is clear. Would you be interested in seeing how these metrics could apply to your organization?
-
-Let me know when you're available for a quick conversation.
+Let me know your availability for a brief conversation.
 
 Best regards,
-[Your Name]
-${campaignName}`,
+[Your Name]`,
         },
       ];
 
