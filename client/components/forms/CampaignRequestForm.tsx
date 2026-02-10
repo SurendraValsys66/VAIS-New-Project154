@@ -1010,6 +1010,7 @@ function DeliverablesDialog({
 
 export default function CampaignRequestForm() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>([]);
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignFormSchema),
@@ -1022,6 +1023,7 @@ export default function CampaignRequestForm() {
       employeeSize: "",
       revenue: "",
       industries: [],
+      campaignAssets: [],
     },
   });
 
