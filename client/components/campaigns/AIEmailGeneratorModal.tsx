@@ -261,8 +261,8 @@ ${campaignName}`,
                   <input
                     type="file"
                     id="file-upload"
+                    key={`file-input-${uploadedFiles.length}`}
                     multiple
-                    accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.csv"
                     onChange={handleFileUpload}
                     className="hidden"
                   />
