@@ -588,6 +588,7 @@ export default function ProspectResults() {
   });
 
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem("prospect:favorites");
