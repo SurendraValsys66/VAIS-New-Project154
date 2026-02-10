@@ -1011,6 +1011,7 @@ function DeliverablesDialog({
 }
 
 export default function CampaignRequestForm() {
+  const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>([]);
   const [emailGeneratorOpen, setEmailGeneratorOpen] = useState(false);
