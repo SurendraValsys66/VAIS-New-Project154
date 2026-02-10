@@ -375,6 +375,7 @@ interface DeliverablesDialogProps {
   revenue: string;
   userHasFullPermission?: boolean;
   isFormValid?: boolean;
+  selectedAssets?: SelectedAsset[];
 }
 
 type CampaignStatus = "pending" | "accepted" | "declined";
