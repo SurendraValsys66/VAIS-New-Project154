@@ -1378,16 +1378,12 @@ export default function CampaignRequestForm() {
                         type="button"
                         className={cn(
                           "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2 w-full",
-                          selectedAssets.some((a) => a.id === "landing-page" || a.id === "email-template")
-                            ? "bg-purple-100 border-purple-500 text-purple-900"
-                            : "bg-gray-50 border-gray-200 text-gray-700 hover:border-purple-300",
+                          "bg-gray-50 border-gray-200 text-gray-700 hover:border-purple-300",
                         )}
                       >
                         <Globe className="w-3 h-3" />
                         <span>Landing Page</span>
-                        {selectedAssets.some((a) => a.id === "landing-page" || a.id === "email-template") && (
-                          <Check className="w-3 h-3 ml-auto" />
-                        )}
+                        <ChevronDown className="w-3 h-3 ml-auto" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-48 p-0">
