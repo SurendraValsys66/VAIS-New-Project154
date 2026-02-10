@@ -400,8 +400,8 @@ interface DeliverablesDialogProps {
   geolocations: string[];
   industries: string[];
   campaignName: string;
-  employeeSize: string;
-  revenue: string;
+  employeeSize: string[];
+  revenue: string[];
   userHasFullPermission?: boolean;
   isFormValid?: boolean;
 }
