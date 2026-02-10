@@ -8,14 +8,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Copy,
-  Check,
-  Mail,
+  Download,
+  Send,
+  FileText,
+  Upload,
   Sparkles,
-  Zap,
+  X,
+  Edit2,
+  Trash2,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,111 +33,11 @@ interface AIEmailGeneratorModalProps {
   industries: string[];
 }
 
-interface EmailSample {
-  id: string;
-  variant: string;
+type ViewType = "input" | "preview" | "edit";
+
+interface GeneratedEmail {
   subject: string;
-  preview: string;
   body: string;
-  cta: string;
-  tone: string;
-}
-
-// Email sample generator
-function generateEmailSamples(
-  campaignName: string,
-  jobTitles: string[],
-  jobFunctions: string[],
-  jobLevels: string[],
-  industries: string[],
-): EmailSample[] {
-  const primaryJobTitle = jobTitles[0] || "Professional";
-  const primaryFunction = jobFunctions[0] || "Your Team";
-  const primaryLevel = jobLevels[0] || "Manager";
-  const primaryIndustry = industries[0] || "Your Industry";
-
-  return [
-    {
-      id: "sample-1",
-      variant: "Professional & Formal",
-      subject: `${campaignName}: Strategic Opportunity for ${primaryJobTitle}s in ${primaryIndustry}`,
-      preview: `Discover how industry leaders are transforming their ${primaryFunction} operations...`,
-      body: `Dear ${primaryLevel},
-
-I hope this message finds you well. I'm reaching out because your expertise in ${primaryFunction} at a ${primaryIndustry} organization like yours makes you an ideal fit for our latest initiative.
-
-At ${campaignName}, we're helping ${primaryJobTitle}s like yourself drive meaningful transformation in ${primaryFunction}. Our platform has helped over 500+ companies increase efficiency by 40% and reduce operational costs.
-
-What makes our solution different:
-• Industry-specific best practices tailored for ${primaryIndustry}
-• Seamless integration with your existing workflows
-• Dedicated support from ${primaryFunction} experts
-
-I'd love to schedule a brief 15-minute call to discuss how we can help you achieve your goals for 2024. Would you be available next week?
-
-Best regards,
-[Your Name]
-[Your Title]
-${campaignName}`,
-      cta: "Schedule a Demo",
-      tone: "Professional",
-    },
-    {
-      id: "sample-2",
-      variant: "Conversational & Engaging",
-      subject: `Quick question for you, ${primaryLevel}...`,
-      preview: `I noticed you're working in ${primaryFunction} and thought you'd appreciate this...`,
-      body: `Hi there!
-
-I came across your profile and noticed you're focused on ${primaryFunction} in ${primaryIndustry}. Honestly, that's exactly the type of leader we're trying to help right now.
-
-Here's the thing: most ${primaryJobTitle}s spend 15+ hours per week on manual tasks that could be automated. It's frustrating, right? 
-
-At ${campaignName}, we've built something specifically to solve this. Our platform is already helping teams like yours:
-✓ Save 10+ hours per week on manual processes
-✓ Improve team collaboration across ${primaryFunction}
-✓ Get actionable insights that actually move the needle
-
-The best part? You can get started in minutes, no complicated setup required.
-
-Would you be open to a quick chat? I can show you exactly how this works for teams in ${primaryIndustry} and answer any questions you might have.
-
-Cheers,
-[Your Name]
-${campaignName}`,
-      cta: "Let's Chat",
-      tone: "Friendly",
-    },
-    {
-      id: "sample-3",
-      variant: "Problem-Focused & Solution-Oriented",
-      subject: `${primaryJobTitle}s in ${primaryIndustry}: Are you struggling with this?`,
-      preview: `Common challenge we see ${jobLevels.join("/")}s facing in ${primaryFunction}...`,
-      body: `Hello ${primaryLevel},
-
-I work with ${primaryJobTitle}s across ${primaryIndustry}, and there's one challenge I hear about constantly: ${primaryFunction} teams spend too much time on repetitive tasks and not enough on strategic work.
-
-Sound familiar?
-
-The root cause? Most processes are still manual, error-prone, and don't scale as the team grows.
-
-That's why we built ${campaignName}. We help organizations like yours:
-
-📊 Replace manual ${primaryFunction} processes with intelligent automation
-🚀 Accelerate project delivery by up to 3x
-💡 Empower ${primaryJobTitle}s to focus on high-impact work
-
-We've already partnered with leading ${primaryIndustry} companies that are seeing real results. I'd be happy to share a quick case study specific to your organization type.
-
-Would it make sense to connect for 20 minutes next Tuesday or Wednesday?
-
-Looking forward to connecting,
-[Your Name]
-${campaignName}`,
-      cta: "View Case Study",
-      tone: "Data-Driven",
-    },
-  ];
 }
 
 export function AIEmailGeneratorModal({
@@ -147,191 +50,404 @@ export function AIEmailGeneratorModal({
   geolocations,
   industries,
 }: AIEmailGeneratorModalProps) {
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [currentSampleIndex, setCurrentSampleIndex] = useState(0);
-
-  const samples = generateEmailSamples(
-    campaignName,
-    jobTitles,
-    jobFunctions,
-    jobLevels,
-    industries,
+  const [view, setView] = useState<ViewType>("input");
+  const [productDescription, setProductDescription] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedEmail, setGeneratedEmail] = useState<GeneratedEmail | null>(
+    null
   );
+  const [editedEmail, setEditedEmail] = useState<GeneratedEmail | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
-  const currentSample = samples[currentSampleIndex];
+  // Generate email content (mock AI)
+  const generateEmail = () => {
+    if (!productDescription.trim()) {
+      alert("Please enter a product description");
+      return;
+    }
 
-  const handleCopy = (text: string, sampleId: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(sampleId);
-    setTimeout(() => setCopiedId(null), 2000);
+    setIsGenerating(true);
+
+    // Simulate AI generation delay
+    setTimeout(() => {
+      const primaryJobTitle = jobTitles[0] || "Professional";
+      const primaryIndustry = industries[0] || "Your Industry";
+
+      const email: GeneratedEmail = {
+        subject: `Transform Your ${primaryIndustry} with ${campaignName}: ${productDescription.substring(0, 30)}...`,
+        body: `Dear ${jobLevels[0] || "Manager"},
+
+I hope this message finds you well. I'm reaching out because I came across your profile and believe you'd be an excellent fit for what we're offering.
+
+At ${campaignName}, we've developed something that addresses a key challenge in ${jobFunctions[0] || "your function"}: "${productDescription}"
+
+What makes our solution unique:
+• Specifically designed for ${jobTitles.slice(0, 2).join(" and ")} professionals
+• Proven to deliver results in ${primaryIndustry}
+• Tailored for ${jobLevels.join(", ")} level professionals
+
+${
+  uploadedFiles.length > 0
+    ? `I've also attached relevant materials (${uploadedFiles.map((f) => f.name).join(", ")}) that showcase how this works in practice.`
+    : ""
+}
+
+Would you be open to a brief conversation about how this could benefit your team? I can share specific case studies from similar organizations in ${geolocations.slice(0, 1).join(", ")}.
+
+Looking forward to connecting.
+
+Best regards,
+[Your Name]
+${campaignName}`,
+      };
+
+      setGeneratedEmail(email);
+      setEditedEmail(email);
+      setView("preview");
+      setIsGenerating(false);
+    }, 1500);
+  };
+
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const validFiles = files.filter((file) => {
+        const validTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-powerpoint",
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+        ];
+        return validTypes.includes(file.type);
+      });
+      setUploadedFiles([...uploadedFiles, ...validFiles]);
+    }
+  };
+
+  // Handle drag and drop
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files) {
+      const files = Array.from(e.dataTransfer.files);
+      const validFiles = files.filter((file) => {
+        const validTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-powerpoint",
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+        ];
+        return validTypes.includes(file.type);
+      });
+      setUploadedFiles([...uploadedFiles, ...validFiles]);
+    }
+  };
+
+  // Download email
+  const downloadEmail = (format: "pdf" | "docx") => {
+    if (!editedEmail) return;
+
+    const content = `${editedEmail.subject}\n\n${editedEmail.body}`;
+    const element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(content)
+    );
+    element.setAttribute(
+      "download",
+      `email_draft.${format === "pdf" ? "pdf" : "docx"}`
+    );
+    element.style.display = "none";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  // Send email (mock)
+  const sendEmail = () => {
+    alert("Email sent successfully!");
+    onClose();
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
+  };
+
+  const handleClose = () => {
+    setView("input");
+    setProductDescription("");
+    setUploadedFiles([]);
+    setGeneratedEmail(null);
+    setEditedEmail(null);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Sparkles className="w-6 h-6 text-blue-600" />
             AI Email Generator
           </DialogTitle>
           <DialogDescription>
-            Preview 3 AI-generated email samples customized for your campaign:
-            <span className="font-semibold text-gray-900 block mt-1">
-              "{campaignName}"
-            </span>
+            {view === "input" && "Describe your product and let AI generate a professional email"}
+            {view === "preview" && "Review your generated email"}
+            {view === "edit" && "Edit your email before sending"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Campaign Context Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-            {jobTitles.length > 0 && (
+          {/* INPUT VIEW */}
+          {view === "input" && (
+            <div className="space-y-4">
+              {/* Product Description */}
               <div>
-                <p className="text-xs text-gray-600 font-medium">Job Titles</p>
-                <p className="text-sm text-gray-900 truncate">
-                  {jobTitles.slice(0, 2).join(", ")}
-                  {jobTitles.length > 2 ? "..." : ""}
-                </p>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Product Description *
+                </label>
+                <Textarea
+                  placeholder="Describe your product or service in detail. Include key features, benefits, and unique value propositions..."
+                  value={productDescription}
+                  onChange={(e) => setProductDescription(e.target.value)}
+                  className="min-h-32 text-sm"
+                />
               </div>
-            )}
-            {jobLevels.length > 0 && (
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Levels</p>
-                <p className="text-sm text-gray-900 truncate">
-                  {jobLevels.slice(0, 2).join(", ")}
-                  {jobLevels.length > 2 ? "..." : ""}
-                </p>
-              </div>
-            )}
-            {geolocations.length > 0 && (
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Regions</p>
-                <p className="text-sm text-gray-900 truncate">
-                  {geolocations.slice(0, 2).join(", ")}
-                  {geolocations.length > 2 ? "..." : ""}
-                </p>
-              </div>
-            )}
-            {industries.length > 0 && (
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Industries</p>
-                <p className="text-sm text-gray-900 truncate">
-                  {industries.slice(0, 2).join(", ")}
-                  {industries.length > 2 ? "..." : ""}
-                </p>
-              </div>
-            )}
-          </div>
 
-          {/* Email Samples Carousel */}
-          <div className="space-y-4">
-            {/* Navigation Tabs */}
-            <Tabs
-              value={currentSample.id}
-              onValueChange={(value) => {
-                const index = samples.findIndex((s) => s.id === value);
-                setCurrentSampleIndex(index);
-              }}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-3 gap-2 bg-transparent">
-                {samples.map((sample, index) => (
-                  <TabsTrigger
-                    key={sample.id}
-                    value={sample.id}
-                    className={cn(
-                      "text-xs font-medium py-2 px-3 rounded-lg border-2 transition-all",
-                      currentSampleIndex === index
-                        ? "bg-blue-100 border-blue-500 text-blue-900"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300",
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Zap className="w-3 h-3" />
-                      Sample {index + 1}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {samples.map((sample, index) => (
-                <TabsContent
-                  key={sample.id}
-                  value={sample.id}
-                  className="space-y-4"
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Attach Supporting Files (Optional)
+                </label>
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                    dragActive
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 bg-gray-50 hover:border-blue-300",
+                  )}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
                 >
-                  {/* Email Preview Card */}
-                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-2 border-b border-gray-200">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <Badge className="bg-blue-100 text-blue-800 text-xs mb-1">
-                            {sample.tone} Tone
-                          </Badge>
-                          <h4 className="font-bold text-gray-900 text-sm">
-                            {sample.variant}
-                          </h4>
-                        </div>
-                        <Mail className="w-5 h-5 text-gray-400" />
-                      </div>
-                    </div>
-
-                    {/* Email Content */}
-                    <div className="p-3 space-y-2">
-                      {/* Subject Line */}
-                      <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                        <p className="text-xs font-semibold text-gray-600 mb-1">
-                          SUBJECT
-                        </p>
-                        <p className="text-xs font-medium text-gray-900 line-clamp-2">
-                          {sample.subject}
-                        </p>
-                      </div>
-
-                      {/* Email Body */}
-                      <div className="bg-white rounded-lg p-3 border border-gray-200 max-h-64 overflow-y-auto">
-                        <div className="text-xs text-gray-800 whitespace-pre-wrap leading-relaxed font-mono">
-                          {sample.body}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Copy Button - Below Email Body */}
-                    <div className="px-3 pb-3 flex justify-center">
-                      <Button
-                        type="button"
-                        size="xs"
-                        onClick={() => handleCopy(sample.body, sample.id)}
-                        className={cn(
-                          "gap-1 text-xs h-8 px-4",
-                          copiedId === sample.id
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-blue-600 hover:bg-blue-700",
-                        )}
+                  <input
+                    type="file"
+                    id="file-upload"
+                    multiple
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="w-8 h-8 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-900">
+                      Drag files here or{" "}
+                      <label
+                        htmlFor="file-upload"
+                        className="text-blue-600 hover:text-blue-700 cursor-pointer underline"
                       >
-                        {copiedId === sample.id ? (
-                          <>
-                            <Check className="w-3 h-3" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" />
-                            Copy Email
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                        browse
+                      </label>
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Supports PDF, Word, PowerPoint, and Images (max 10 MB each)
+                    </p>
                   </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </div>
+                </div>
 
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-gray-600" />
+                          <span className="text-xs text-gray-700">
+                            {file.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="text-gray-400 hover:text-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Campaign Context */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  <span className="font-semibold">Campaign:</span> {campaignName}{" "}
+                  | <span className="font-semibold">Target:</span>{" "}
+                  {jobTitles.slice(0, 2).join(", ")} in{" "}
+                  {industries.slice(0, 1).join(", ")}
+                </p>
+              </div>
+
+              {/* Generate Button */}
+              <Button
+                onClick={generateEmail}
+                disabled={!productDescription.trim() || isGenerating}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10 gap-2"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Generating Email...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generate Email
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* PREVIEW VIEW */}
+          {view === "preview" && generatedEmail && (
+            <div className="space-y-4">
+              {/* Email Preview */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                {/* Subject */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">
+                    SUBJECT
+                  </p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {editedEmail?.subject}
+                  </p>
+                </div>
+
+                {/* Body */}
+                <div className="bg-gray-50 rounded p-3 max-h-48 overflow-y-auto">
+                  <p className="text-xs text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    {editedEmail?.body}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-2">
+                {/* Edit Button */}
+                <Button
+                  onClick={() => setView("edit")}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  Edit
+                </Button>
+
+                {/* Download Button - Dropdown would go here */}
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => downloadEmail("docx")}
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+
+                {/* Send Button */}
+                <Button
+                  onClick={sendEmail}
+                  className="bg-green-600 hover:bg-green-700 text-white gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Send
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* EDIT VIEW */}
+          {view === "edit" && editedEmail && (
+            <div className="space-y-4">
+              {/* Subject Edit */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Subject Line
+                </label>
+                <input
+                  type="text"
+                  value={editedEmail.subject}
+                  onChange={(e) =>
+                    setEditedEmail({ ...editedEmail, subject: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Body Edit */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Email Body
+                </label>
+                <Textarea
+                  value={editedEmail.body}
+                  onChange={(e) =>
+                    setEditedEmail({ ...editedEmail, body: e.target.value })
+                  }
+                  className="min-h-48 text-sm"
+                />
+              </div>
+
+              {/* Save and Cancel Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setView("preview")}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setView("preview")}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Footer Actions */}
+        {/* Footer */}
         <div className="flex gap-3 justify-end border-t pt-4">
           <DialogClose asChild>
             <Button variant="outline">Close</Button>
