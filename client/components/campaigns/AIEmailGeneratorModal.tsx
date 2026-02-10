@@ -115,17 +115,22 @@ ${campaignName}`,
     if (e.target.files) {
       const files = Array.from(e.target.files);
       const validFiles = files.filter((file) => {
-        const validTypes = [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "application/vnd.ms-powerpoint",
-          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-          "image/jpeg",
-          "image/png",
-          "image/gif",
+        const validExtensions = [
+          "pdf",
+          "doc",
+          "docx",
+          "ppt",
+          "pptx",
+          "jpg",
+          "jpeg",
+          "png",
+          "gif",
+          "xls",
+          "xlsx",
+          "csv",
         ];
-        return validTypes.includes(file.type);
+        const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
+        return validExtensions.includes(fileExtension);
       });
       setUploadedFiles([...uploadedFiles, ...validFiles]);
     }
