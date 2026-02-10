@@ -174,6 +174,7 @@ interface MultiSelectProps {
   onSelectedChange: (selected: string[]) => void;
   placeholder: string;
   searchPlaceholder?: string;
+  showSelectAll?: boolean;
 }
 
 function MultiSelect({
@@ -182,12 +183,23 @@ function MultiSelect({
   onSelectedChange,
   placeholder,
   searchPlaceholder = "Search...",
+  showSelectAll = false,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
 
   const handleUnselect = (item: string) => {
     onSelectedChange(selected.filter((i) => i !== item));
   };
+
+  const handleSelectAll = () => {
+    if (selected.length === options.length) {
+      onSelectedChange([]);
+    } else {
+      onSelectedChange([...options]);
+    }
+  };
+
+  const isAllSelected = selected.length === options.length && options.length > 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -239,6 +251,20 @@ function MultiSelect({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
+              {showSelectAll && (
+                <CommandItem
+                  onSelect={handleSelectAll}
+                  className="font-medium bg-gray-50 hover:bg-blue-50"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      isAllSelected ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  Select All
+                </CommandItem>
+              )}
               {options.map((option) => (
                 <CommandItem
                   key={option}
