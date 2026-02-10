@@ -229,31 +229,14 @@ ${campaignName}`,
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Product Description *
                 </label>
-                <Textarea
-                  placeholder="Describe your product or service in detail. Include key features, benefits, and unique value propositions..."
-                  value={productDescription}
-                  onChange={(e) => setProductDescription(e.target.value)}
-                  className="min-h-32 text-sm"
-                />
-              </div>
-
-              {/* File Upload */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Attach Supporting Files (Optional)
-                </label>
-                <div
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
-                    dragActive
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 bg-gray-50 hover:border-blue-300",
-                  )}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
+                <div className="relative">
+                  <Textarea
+                    placeholder="Describe your product or service in detail. Include key features, benefits, and unique value propositions..."
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    className="min-h-32 text-sm pr-10"
+                  />
+                  {/* Pin Icon Button for File Attachment */}
                   <input
                     type="file"
                     id="file-upload"
@@ -262,51 +245,46 @@ ${campaignName}`,
                     onChange={handleFileUpload}
                     className="hidden"
                   />
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="w-8 h-8 text-gray-400" />
-                    <p className="text-sm font-medium text-gray-900">
-                      Drag files here or{" "}
-                      <label
-                        htmlFor="file-upload"
-                        className="text-blue-600 hover:text-blue-700 cursor-pointer underline"
-                      >
-                        browse
-                      </label>
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Supports PDF, Word, PowerPoint, and Images (max 10 MB each)
-                    </p>
-                  </div>
+                  <label
+                    htmlFor="file-upload"
+                    className="absolute bottom-3 left-3 cursor-pointer text-gray-500 hover:text-blue-600 transition-colors"
+                    title="Attach files"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </label>
                 </div>
-
-                {/* Uploaded Files List */}
-                {uploadedFiles.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {uploadedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-200"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-gray-600" />
-                          <span className="text-xs text-gray-700">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => removeFile(index)}
-                          className="text-gray-400 hover:text-red-600"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
+
+              {/* Uploaded Files List */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-gray-700">
+                    Attached Files ({uploadedFiles.length})
+                  </p>
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-600" />
+                        <span className="text-xs text-gray-700">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="text-gray-400 hover:text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Campaign Context */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
