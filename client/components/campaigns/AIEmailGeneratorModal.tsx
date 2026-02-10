@@ -112,27 +112,34 @@ ${campaignName}`,
 
   // Handle file upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
+      const validExtensions = [
+        "pdf",
+        "doc",
+        "docx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "xls",
+        "xlsx",
+        "csv",
+      ];
+
       const validFiles = files.filter((file) => {
-        const validExtensions = [
-          "pdf",
-          "doc",
-          "docx",
-          "ppt",
-          "pptx",
-          "jpg",
-          "jpeg",
-          "png",
-          "gif",
-          "xls",
-          "xlsx",
-          "csv",
-        ];
         const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
         return validExtensions.includes(fileExtension);
       });
-      setUploadedFiles([...uploadedFiles, ...validFiles]);
+
+      if (validFiles.length > 0) {
+        setUploadedFiles((prevFiles) => [...prevFiles, ...validFiles]);
+      }
+
+      // Reset input value to allow uploading same file again
+      e.target.value = "";
     }
   };
 
