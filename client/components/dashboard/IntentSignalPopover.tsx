@@ -13,6 +13,9 @@ import {
   Sparkles,
   Download,
   Check,
+  ChevronRight,
+  Users,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import IntentSignalModal from "./IntentSignalModal";
@@ -49,6 +52,14 @@ interface IntentSignalPopoverProps {
   children: React.ReactNode;
   itemId?: string;
   onAddToList?: (itemId: string, checked: boolean) => void;
+}
+
+interface TopicDataItem {
+  name: string;
+  score: number;
+  personas: string[];
+  metros: string[];
+  domains: string[];
 }
 
 const chartConfig = {
@@ -134,6 +145,7 @@ export default function IntentSignalPopover({
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>();
   const chartData = generateChartData(data, selectedTopic);
   const [isAdded, setIsAdded] = useState(false);
+  const [expandedTopics, setExpandedTopics] = useState<Set<number>>(new Set([0]));
 
   const handleChartClick = () => {
     setIsPanelOpen(false);
@@ -514,145 +526,179 @@ export default function IntentSignalPopover({
             {/* Scrollable Content Section */}
             <div className="flex-1 overflow-auto p-5">
               <div className="space-y-6">
-                {/* Topics Section - Enhanced Table */}
+                {/* Topics Section - Compact Expandable List */}
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center space-x-2">
                     <div className="w-1 h-4 bg-gradient-to-b from-valasys-orange to-orange-500 rounded-full"></div>
                     <span>Top Topics</span>
+                    <span className="text-xs font-normal text-gray-500 ml-auto">
+                      Click to expand
+                    </span>
                   </h3>
 
-                  {/* Topics Table */}
-                  <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-700">Topic</th>
-                          <th className="px-3 py-2.5 text-center font-semibold text-gray-700 whitespace-nowrap">
-                            <div className="flex items-center justify-center gap-1">Score</div>
-                          </th>
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap">B2B Personas</th>
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap">Top Metros</th>
-                          <th className="px-3 py-2.5 text-left font-semibold text-gray-700 whitespace-nowrap">Domain Origin</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.relatedTopics.slice(0, 3).map((topic, index) => {
-                          const topicData = [
-                            {
-                              name: "Fair Value Measurement",
-                              score: 61,
-                              personas: ["CFO", "Controller"],
-                              metros: ["New York, NY", "San Francisco, CA"],
-                              domains: ["Financial Services", "Accounting"],
-                            },
-                            {
-                              name: "Goodwill Accounting",
-                              score: 73,
-                              personas: ["Financial Analyst", "M&A Manager"],
-                              metros: ["Boston, MA", "Los Angeles, CA"],
-                              domains: ["Banking", "Private Equity"],
-                            },
-                            {
-                              name: "Revenue Recognition",
-                              score: 58,
-                              personas: ["Revenue Analyst", "Compliance Officer"],
-                              metros: ["Seattle, WA", "Denver, CO"],
-                              domains: ["SaaS", "Technology"],
-                            },
-                          ];
+                  {/* Topics List */}
+                  <div className="space-y-2">
+                    {data.relatedTopics.slice(0, 3).map((topic, index) => {
+                      const topicsData: TopicDataItem[] = [
+                        {
+                          name: "Fair Value Measurement",
+                          score: 61,
+                          personas: ["CFO", "Controller", "Accounting Manager"],
+                          metros: ["New York, NY", "San Francisco, CA", "Chicago, IL"],
+                          domains: ["Financial Services", "Accounting", "Audit"],
+                        },
+                        {
+                          name: "Goodwill Accounting",
+                          score: 73,
+                          personas: ["Financial Analyst", "M&A Manager", "Auditor"],
+                          metros: ["Boston, MA", "Los Angeles, CA", "Dallas, TX"],
+                          domains: ["Banking", "Private Equity", "Consulting"],
+                        },
+                        {
+                          name: "Revenue Recognition",
+                          score: 58,
+                          personas: ["Revenue Analyst", "Compliance Officer", "CFO"],
+                          metros: ["Seattle, WA", "Denver, CO", "Austin, TX"],
+                          domains: ["SaaS", "Technology", "Software"],
+                        },
+                      ];
 
-                          const currentTopic = topicData[index] || {
-                            name: topic,
-                            score: Math.floor(Math.random() * 40 + 60),
-                            personas: ["Manager", "Analyst"],
-                            metros: ["New York, NY"],
-                            domains: ["Technology"],
-                          };
+                      const currentTopic = topicsData[index] || {
+                        name: topic,
+                        score: Math.floor(Math.random() * 40 + 60),
+                        personas: ["Manager", "Analyst"],
+                        metros: ["New York, NY"],
+                        domains: ["Technology"],
+                      };
 
-                          const isSelected = selectedTopic === topic;
-                          const getScoreBadgeColor = (score: number) => {
-                            if (score >= 70) return "bg-green-100 text-green-800";
-                            if (score >= 50) return "bg-yellow-100 text-yellow-800";
-                            return "bg-red-100 text-red-800";
-                          };
+                      const isExpanded = expandedTopics.has(index);
+                      const isSelected = selectedTopic === topic;
 
-                          return (
-                            <tr
-                              key={index}
-                              onClick={() =>
-                                setSelectedTopic(isSelected ? undefined : topic)
-                              }
-                              className={cn(
-                                "border-b border-gray-100 hover:bg-orange-50 transition-colors cursor-pointer group",
-                                isSelected ? "bg-orange-50" : "bg-white"
-                              )}
-                            >
-                              <td className="px-3 py-2.5">
-                                <div className="flex items-center gap-2">
-                                  <div className={cn(
-                                    "w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all",
-                                    isSelected ? "bg-valasys-orange w-2 h-2" : "bg-valasys-orange"
-                                  )} />
-                                  <span className={cn(
-                                    "font-medium transition-colors",
-                                    isSelected ? "text-valasys-orange font-semibold" : "text-gray-900"
-                                  )}>
-                                    {currentTopic.name}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-3 py-2.5 text-center">
-                                <Badge className={cn("font-bold text-xs", getScoreBadgeColor(currentTopic.score))}>
-                                  {currentTopic.score}
-                                </Badge>
-                              </td>
-                              <td className="px-3 py-2.5">
-                                <div className="flex flex-wrap gap-1">
-                                  {currentTopic.personas.slice(0, 1).map((persona, i) => (
+                      const getScoreBadgeColor = (score: number) => {
+                        if (score >= 70) return "bg-green-100 text-green-800";
+                        if (score >= 50) return "bg-yellow-100 text-yellow-800";
+                        return "bg-red-100 text-red-800";
+                      };
+
+                      const toggleExpand = () => {
+                        const newExpanded = new Set(expandedTopics);
+                        if (newExpanded.has(index)) {
+                          newExpanded.delete(index);
+                        } else {
+                          newExpanded.add(index);
+                        }
+                        setExpandedTopics(newExpanded);
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-200 bg-white hover:border-valasys-orange hover:shadow-md"
+                        >
+                          {/* Header */}
+                          <button
+                            onClick={toggleExpand}
+                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors group"
+                          >
+                            <div className="flex items-center gap-3 flex-1 text-left">
+                              {/* Score Badge */}
+                              <Badge className={cn("font-bold text-xs flex-shrink-0", getScoreBadgeColor(currentTopic.score))}>
+                                {currentTopic.score}
+                              </Badge>
+
+                              {/* Topic Name */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-semibold text-gray-900 group-hover:text-valasys-orange transition-colors">
+                                  {currentTopic.name}
+                                </h4>
+                              </div>
+                            </div>
+
+                            {/* Expand/Collapse Icon */}
+                            <div className="flex-shrink-0 ml-2">
+                              <div className={cn(
+                                "w-5 h-5 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-orange-50 transition-all",
+                                isExpanded && "bg-valasys-orange/10"
+                              )}>
+                                <ChevronRight className={cn(
+                                  "w-4 h-4 text-gray-600 group-hover:text-valasys-orange transition-all",
+                                  isExpanded && "rotate-90 text-valasys-orange"
+                                )} />
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* Expandable Content */}
+                          {isExpanded && (
+                            <div className="border-t border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+
+                              {/* B2B Personas */}
+                              <div>
+                                <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+                                  <Users className="w-3.5 h-3.5 text-blue-600" />
+                                  B2B Personas
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {currentTopic.personas.map((persona, i) => (
                                     <Badge key={i} variant="secondary" className="bg-blue-100 text-blue-800 text-xs font-normal">
                                       {persona}
                                     </Badge>
                                   ))}
-                                  {currentTopic.personas.length > 1 && (
-                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 text-xs font-normal">
-                                      +{currentTopic.personas.length - 1}
-                                    </Badge>
-                                  )}
                                 </div>
-                              </td>
-                              <td className="px-3 py-2.5">
-                                <div className="flex flex-wrap gap-1">
-                                  {currentTopic.metros.slice(0, 1).map((metro, i) => (
+                              </div>
+
+                              {/* Top Metros */}
+                              <div>
+                                <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+                                  <MapPin className="w-3.5 h-3.5 text-green-600" />
+                                  Top Metros
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {currentTopic.metros.map((metro, i) => (
                                     <Badge key={i} variant="secondary" className="bg-green-100 text-green-800 text-xs font-normal">
                                       {metro}
                                     </Badge>
                                   ))}
-                                  {currentTopic.metros.length > 1 && (
-                                    <Badge variant="secondary" className="bg-green-50 text-green-700 text-xs font-normal">
-                                      +{currentTopic.metros.length - 1}
-                                    </Badge>
-                                  )}
                                 </div>
-                              </td>
-                              <td className="px-3 py-2.5">
-                                <div className="flex flex-wrap gap-1">
-                                  {currentTopic.domains.slice(0, 1).map((domain, i) => (
+                              </div>
+
+                              {/* Domain Origin */}
+                              <div>
+                                <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+                                  <Globe className="w-3.5 h-3.5 text-purple-600" />
+                                  Domain Origin
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {currentTopic.domains.map((domain, i) => (
                                     <Badge key={i} variant="secondary" className="bg-purple-100 text-purple-800 text-xs font-normal">
                                       {domain}
                                     </Badge>
                                   ))}
-                                  {currentTopic.domains.length > 1 && (
-                                    <Badge variant="secondary" className="bg-purple-50 text-purple-700 text-xs font-normal">
-                                      +{currentTopic.domains.length - 1}
-                                    </Badge>
-                                  )}
                                 </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                              </div>
+
+                              {/* Divider */}
+                              <div className="border-t border-gray-200 pt-3 flex gap-2">
+                                {/* View Trend Button */}
+                                <button
+                                  onClick={() => {
+                                    setSelectedTopic(selectedTopic === topic ? undefined : topic);
+                                  }}
+                                  className={cn(
+                                    "flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                                    selectedTopic === topic
+                                      ? "bg-valasys-orange text-white border border-valasys-orange"
+                                      : "bg-orange-50 text-valasys-orange border border-orange-200 hover:border-valasys-orange hover:bg-orange-100"
+                                  )}
+                                >
+                                  {selectedTopic === topic ? "✓ Viewing Trend" : "View Trend"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
