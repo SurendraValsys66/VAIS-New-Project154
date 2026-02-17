@@ -53,6 +53,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -592,27 +600,28 @@ function DeliverablesDialog({
   }, 0);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <Button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={!isFormValid}
-        className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Info className="w-4 h-4" />
-        Check Deliverables
-      </Button>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          type="button"
+          disabled={!isFormValid}
+          className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Info className="w-4 h-4" />
+          Check Deliverables
+        </Button>
+      </SheetTrigger>
 
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900">
+      <SheetContent side="right" className="w-full sm:max-w-2xl lg:max-w-4xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="text-2xl font-bold text-gray-900">
             Deliverables Overview
-          </DialogTitle>
-          <DialogDescription className="text-base mt-1">
+          </SheetTitle>
+          <SheetDescription className="text-base mt-1">
             {campaignName || "Your Campaign"} - Database Reach Analysis &
             Campaign Summary
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="space-y-6 py-4">
           {/* Deliverables Overview Tables */}
@@ -1036,7 +1045,7 @@ function DeliverablesDialog({
             </ul>
           </div>
         </div>
-      </DialogContent>
+      </SheetContent>
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
@@ -1080,7 +1089,7 @@ function DeliverablesDialog({
           </div>
         </DialogContent>
       </Dialog>
-    </Dialog>
+    </Sheet>
   );
 }
 
