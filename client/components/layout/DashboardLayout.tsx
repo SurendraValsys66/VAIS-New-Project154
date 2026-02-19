@@ -67,6 +67,7 @@ import { useTour } from "@/contexts/TourContext";
 import PlatformTour from "@/components/tour/PlatformTour";
 import MasteryBottomBar from "@/components/layout/MasteryBottomBar";
 import MasteryProgressBadge from "@/components/layout/MasteryProgressBadge";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -797,7 +798,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div
         className={cn(
           "flex-1 flex flex-col min-w-0 transition-all duration-300",
-          // Mobile: No margin (sidebar overlays)
+          // Mobile: No margin (sidebar overlays), add padding for bottom nav
+          "pb-32 lg:pb-0",
           // Desktop: Proper margin for sidebar
           "lg:ml-16", // Default margin for collapsed sidebar
           isExpanded && "lg:ml-64", // Expanded margin for open sidebar
@@ -1369,6 +1371,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Mastery Bottom Bar */}
       <MasteryBottomBar />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
